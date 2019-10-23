@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="234ab805-1173-485f-b2b9-ff3dd03604ab" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="mt" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="AnnotationType" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/main/java/wp/service/NoteService.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="downloadSourcesAutomatically" value="true" />
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1QKoM4p68uMfsG1IY4jXD5Jm4kt" />
+  <component name="PropertiesComponent">
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="ExpandSpringBootJavaOptionsPanel" value="true" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
+    <property name="RequestMappingsPanelOrder0" value="0" />
+    <property name="RequestMappingsPanelOrder1" value="1" />
+    <property name="RequestMappingsPanelWidth0" value="75" />
+    <property name="RequestMappingsPanelWidth1" value="75" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/wp/exception" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.3264368" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\exception" />
+      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\shiro" />
+      <recent name="E:\gitProject\javaProject\mt\src\main\resources" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="wp.controller" />
+      <recent name="wp.exception" />
+      <recent name="wp.util" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\gitProject\javaProject\mt\src\main\resources\static" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration name="WebApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="mt" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="wp.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="SPRING_BOOT_MAIN_CLASS" value="wp.WebApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.WebApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="StructureViewFactory">
+    <option name="ACTIVE_ACTIONS" value=",SHOW_NON_PUBLIC,SHOW_INTERFACES,SHOW_FIELDS" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="234ab805-1173-485f-b2b9-ff3dd03604ab" name="Default Changelist" comment="" />
+      <created>1567528598346</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1567528598346</updated>
+      <workItem from="1567528602298" duration="1818000" />
+      <workItem from="1567601765298" duration="13809000" />
+      <workItem from="1567658356420" duration="10692000" />
+      <workItem from="1567689431076" duration="1603000" />
+      <workItem from="1567743826716" duration="8103000" />
+      <workItem from="1567831445695" duration="14249000" />
+      <workItem from="1567910482554" duration="8183000" />
+      <workItem from="1568031178954" duration="1872000" />
+      <workItem from="1568043200448" duration="634000" />
+      <workItem from="1568096933106" duration="6602000" />
+      <workItem from="1568172439854" duration="640000" />
+      <workItem from="1568176255341" duration="12921000" />
+      <workItem from="1568275280283" duration="3769000" />
+      <workItem from="1568352524716" duration="14977000" />
+      <workItem from="1568436333062" duration="654000" />
+      <workItem from="1568445482723" duration="9631000" />
+      <workItem from="1568526715774" duration="2742000" />
+      <workItem from="1568530670129" duration="8206000" />
+      <workItem from="1568608650800" duration="2081000" />
+      <workItem from="1568724887908" duration="9323000" />
+      <workItem from="1568793444798" duration="5184000" />
+      <workItem from="1569423999783" duration="1536000" />
+      <workItem from="1569589705596" duration="1561000" />
+      <workItem from="1569758220442" duration="7505000" />
+      <workItem from="1569811797989" duration="7527000" />
+      <workItem from="1569910447668" duration="1695000" />
+      <workItem from="1569987482316" duration="1298000" />
+      <workItem from="1570070087328" duration="1062000" />
+      <workItem from="1570252502723" duration="5429000" />
+      <workItem from="1570455531645" duration="1220000" />
+      <workItem from="1570510628030" duration="70000" />
+      <workItem from="1570771828254" duration="27809000" />
+      <workItem from="1570854873803" duration="530000" />
+      <workItem from="1570855533343" duration="2154000" />
+      <workItem from="1570941956935" duration="7846000" />
+      <workItem from="1571026225055" duration="24469000" />
+      <workItem from="1571121058630" duration="32577000" />
+      <workItem from="1571202693636" duration="23374000" />
+      <workItem from="1571286908506" duration="8756000" />
+      <workItem from="1571374588607" duration="8283000" />
+      <workItem from="1571456080800" duration="11999000" />
+      <workItem from="1571641871396" duration="5788000" />
+      <workItem from="1571731105188" duration="12376000" />
+      <workItem from="1571806517602" duration="17584000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+</project>
