@@ -1,0 +1,5 @@
+# my ignore
+target
+.idea
+wp.sql
+application.properties
