@@ -1,5 +1,5 @@
 # my ignore
-target
+target/
 .idea/
 wp.sql
 application.properties
