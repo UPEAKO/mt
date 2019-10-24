@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="234ab805-1173-485f-b2b9-ff3dd03604ab" name="Default Changelist" comment="" />
+    <list default="true" id="234ab805-1173-485f-b2b9-ff3dd03604ab" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/wp/controller/NoteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/wp/controller/NoteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/log4j2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2.xml" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +41,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/src/main/java/wp/service/NoteService.java" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -46,6 +56,7 @@
     </option>
   </component>
   <component name="ProjectId" id="1QKoM4p68uMfsG1IY4jXD5Jm4kt" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="Downloaded.Files.Path.Enabled" value="false" />
     <property name="ExpandSpringBootJavaOptionsPanel" value="true" />
@@ -56,6 +67,7 @@
     <property name="RequestMappingsPanelOrder1" value="1" />
     <property name="RequestMappingsPanelWidth0" value="75" />
     <property name="RequestMappingsPanelWidth1" value="75" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/wp/exception" />
@@ -67,18 +79,19 @@
     <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\exception" />
-      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\shiro" />
-      <recent name="E:\gitProject\javaProject\mt\src\main\resources" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\gitProject\javaProject\mt" />
+      <recent name="E:\gitProject\javaProject\mt\src\main\resources\static" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="wp.controller" />
       <recent name="wp.exception" />
       <recent name="wp.util" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="E:\gitProject\javaProject\mt\src\main\resources\static" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\exception" />
+      <recent name="E:\gitProject\javaProject\mt\src\main\java\wp\shiro" />
+      <recent name="E:\gitProject\javaProject\mt\src\main\resources" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -103,6 +116,7 @@
         </pattern>
       </extension>
       <option name="SPRING_BOOT_MAIN_CLASS" value="wp.WebApplication" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -169,11 +183,25 @@
       <workItem from="1571456080800" duration="11999000" />
       <workItem from="1571641871396" duration="5788000" />
       <workItem from="1571731105188" duration="12376000" />
-      <workItem from="1571806517602" duration="17584000" />
+      <workItem from="1571806517602" duration="20993000" />
+      <workItem from="1571890928253" duration="1220000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

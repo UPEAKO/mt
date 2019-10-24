@@ -21,6 +21,14 @@ import wp.wrap.UserWrap;
 // FIXME title & category都必须命名唯一，由于通过名称查询（目前名称重复直接导致提交失败）
 // TODO logout function
 // FIXME 每次请求都要查询user,改为缓存（为null查询，否则不查），另外涉及缓存有效期，模仿或使用redis???
+/**
+ *
+ * 配置文件application.properties中配置log4j2.xml路径
+ *
+ * application.properties在jar同级目录、同级目录config子目录、classpath、classpath下config子目录自动应用
+ *
+ * 直接参数指定 java -jar xxx.jar --spring.config.location=D:\springconfig\ --logging.config=./log4j2.xml
+ */
 @RestController
 public class NoteController {
     private static Logger logger = LoggerFactory.getLogger(NoteController.class);
