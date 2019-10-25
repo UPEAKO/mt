@@ -6,7 +6,6 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,19 +18,11 @@ import wp.wrap.UserWrap;
 
 
 // FIXME title & category都必须命名唯一，由于通过名称查询（目前名称重复直接导致提交失败）
-// TODO logout function
-// FIXME 每次请求都要查询user,改为缓存（为null查询，否则不查），另外涉及缓存有效期，模仿或使用redis???
-/**
- *
- * 配置文件application.properties中配置log4j2.xml路径
- *
- * application.properties在jar同级目录、同级目录config子目录、classpath、classpath下config子目录自动应用
- *
- * 直接参数指定 java -jar xxx.jar --spring.config.location=D:\springconfig\ --logging.config=./log4j2.xml
- */
+// FIXME 每次请求都要查询user,改为缓存（为null查询，否则不查）,使用redis
 @RestController
 public class NoteController {
-    private static Logger logger = LoggerFactory.getLogger(NoteController.class);
+
+    private final static Logger logger = LoggerFactory.getLogger(NoteController.class);
 
     private UserService userService;
 
@@ -49,6 +40,7 @@ public class NoteController {
 
     @PostMapping("/token")
     public ResponseBean login(@RequestBody UserWrap userWrap){
+        logger.debug("function[login]");
         return userService.authenticateUser(userWrap.getUserName(), userWrap.getUserPassword());
     }
 
@@ -57,7 +49,8 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean list(@PathVariable String user) {
-        return noteService.getNoteList();
+        logger.debug("function[list]");
+        return noteService.getNoteList(user);
     }
 
     @GetMapping("{user}/notes/{id}")
@@ -65,7 +58,8 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean getNote(@PathVariable("id") Integer id, @PathVariable String user) {
-        return noteService.getNoteById(id);
+        logger.debug("function[getNote]");
+        return noteService.getNoteById(id,user);
     }
 
     @DeleteMapping("{user}/notes/{id}")
@@ -73,16 +67,17 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean deleteNote(@PathVariable("id") Integer id, @PathVariable String user) {
-        return noteService.deleteNoteById(id);
+        logger.debug("function[deleteNote]");
+        return noteService.deleteNoteById(id,user);
     }
 
     @PutMapping("{user}/notes/{id}")
     @RequiresAuthentication
     @RequiresRoles("admin")
     @RequiresPermissions("all")
-    // 更新操作，通过id更新title,content,category
     public ResponseBean updateNote(@PathVariable("id") Integer id, @PathVariable String user, @RequestBody AddWrap addWrap) {
-        return noteService.updateNoteById(id, addWrap);
+        logger.debug("function[updateNote]");
+        return noteService.updateNoteById(id, addWrap,user);
     }
 
     @PostMapping("{user}/notes")
@@ -90,7 +85,8 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean add(@RequestBody AddWrap addWrap, @PathVariable String user) {
-        return noteService.addNote(addWrap);
+        logger.debug("function[add]");
+        return noteService.addNote(addWrap,user);
     }
 
     @PostMapping("{user}/image")
@@ -98,18 +94,14 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean imageUpload(@RequestParam("image") MultipartFile file, @PathVariable String user) {
+        logger.debug("function[imageUpload]");
         return imageStorageService.store(file);
-    }
-
-    @GetMapping("{user}/image/{imageName}")
-    //@RequiresAuthentication
-    public Resource imageDownload(@PathVariable String user, @PathVariable String imageName) {
-        return imageStorageService.loadAsResource(imageName);
     }
 
     @RequestMapping(path = "/401")
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseBean unauthorized() {
+        logger.debug("function[unauthorized]");
         return new ResponseBean(401, "Unauthorized401", null);
     }
 }

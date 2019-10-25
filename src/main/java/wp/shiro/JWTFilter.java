@@ -14,37 +14,34 @@ import java.io.IOException;
 
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 
-    private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(JWTFilter.class);
 
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
-        LOGGER.info("JWTFilter/isLoginAttempt");
+        logger.debug("function[isLoginAttempt]");
         HttpServletRequest req = (HttpServletRequest) request;
-        //"Authorization"关键字来自于父类默认实现，
-        // 此处修改为其它"eg:auth"将导致token传到后面为空，具体原因待debug
+        // FIXME "Authorization"关键字来自于父类默认实现，此处修改为其它"eg:auth"将导致token传到后面为空，具体原因待debug
         String authorization = req.getHeader("Authorization");
-        LOGGER.info("{}", authorization);
+        logger.info("isLoginAttempt-->current token[{}]", authorization);
         return authorization != null;
     }
-    //eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzA4MDkxNjksInVzZXJuYW1lIjoid3AifQ.trFtJ2jXWoFcKBqbCxL6w0HYJKn7lAoNRwbT9xts-DQ
-    //eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzA4MDk5MTQsInVzZXJuYW1lIjoid3AifQ.MT36hQSttK8Ps1zDmfqGK0e6Okjuj7kzxqfauBQ8lUg
+    
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
-        LOGGER.info("JWTFilter/executeLogin");
+        logger.debug("function[executeLogin]");
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String authorization = httpServletRequest.getHeader("Authorization");
-
         JWTToken token = new JWTToken(authorization);
-        // 提交给realm进行登入，如果错误他会抛出异常并被捕获
+        logger.info("executeLogin-->current token[{}]", authorization);
+        // 提交给realm进行登入，如果错误抛出异常并被捕获,登录失败
         getSubject(request, response).login(token);
-        // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
-        //无论是否使用注解总执行，由于filter配置
-        LOGGER.info("JWFilter/isAccessAllowed");
+        logger.debug("function[isAccessAllowed]");
+        // 无论是否使用controller中是否@RequiresAuthentication，本方法总执行
         if (isLoginAttempt(request, response)) {
             try {
                 executeLogin(request, response);
@@ -61,7 +58,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-        LOGGER.info("JWFilter/preHandle");
+        logger.debug("function[preHandle]");
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader("Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
@@ -79,11 +76,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
      * 将非法请求跳转到 /401
      */
     private void response401(ServletRequest req, ServletResponse resp) {
+        logger.debug("function[response401]");
         try {
             HttpServletResponse httpServletResponse = (HttpServletResponse) resp;
             httpServletResponse.sendRedirect("/401");
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 }

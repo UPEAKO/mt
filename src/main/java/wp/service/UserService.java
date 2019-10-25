@@ -13,7 +13,7 @@ import wp.util.JWTUtil;
 @Service
 public class UserService {
 
-    private static Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final static Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private UserRepository userRepository;
 
@@ -23,16 +23,16 @@ public class UserService {
     }
 
     public ResponseBean authenticateUser(String userName, String passWord) {
-        logger.info("{} {}",userName,passWord);
+        logger.debug("function[authenticateUser]");
         User user = userRepository.findUserByName(userName);
         if (user == null) {
-            logger.info("user is null");
+            logger.warn("current user[{}] does not exist", userName);
             throw new UnauthorizedException();
         }
-        logger.info("{}   {}",user.getName(),user.getPassword());
         if (passWord.equals(user.getPassword())) {
             return new ResponseBean(200, "login success", JWTUtil.sign(userName, passWord));
         } else {
+            logger.info("user[{}] with password[{}] try to get token fail",userName,passWord);
             throw new UnauthorizedException();
         }
     }

@@ -22,32 +22,37 @@ import java.util.ArrayList;
 @Service
 public class MyRealm extends AuthorizingRealm {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(MyRealm.class);
 
     private UserRepository userRepository;
 
     private User user;
 
     public User getUser() {
+        logger.debug("function[getUser]");
         return user;
     }
 
     @Autowired
     public MyRealm(UserRepository userRepository) {
+        logger.debug("function[MyRealm]");
+        logger.info("create MyRealm,hashcode[{}]",this.hashCode());
         this.userRepository = userRepository;
     }
 
     @Override
     public boolean supports(AuthenticationToken token) {
+        logger.debug("function[supports]");
         return token instanceof JWTToken;
     }
 
     /**
-     * 只有当需要检测用户权限的时候才会调用此方法，例如checkRole,checkPermission之类的
+     * 只有当需要检测用户权限的时候才会调用此方法，例如checkRole,checkPermission
      */
+    // FIXME doGetAuthorizationInfo每次请求都重复执行4次
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        logger.info("授权");
+        logger.debug("function[doGetAuthorizationInfo]");
         String username = JWTUtil.getUsername(principals.toString());
         if (!user.getName().equals(username)) {
             throw new UnauthorizedException();
@@ -65,14 +70,14 @@ public class MyRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-        logger.info("验证");
+        logger.debug("function[doGetAuthenticationInfo]");
         String token = (String) auth.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (username == null) {
             throw new AuthenticationException("token invalid");
         }
         user = userRepository.findUserByName(username);
-        logger.info("myRealm'hashcode: {}", this.hashCode());
+        logger.info("myRealm'hashcode[{}]", this.hashCode());
         if (user == null) {
             throw new AuthenticationException("User didn't existed!");
         }

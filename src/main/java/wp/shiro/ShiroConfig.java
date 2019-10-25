@@ -20,11 +20,11 @@ import java.util.Map;
 @Configuration
 public class ShiroConfig {
 
-    private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(ShiroConfig.class);
 
     @Bean("securityManager")
     public DefaultWebSecurityManager getManager(MyRealm realm) {
-        LOGGER.info("ShiroConfig/getManager");
+        logger.debug("function[getManager]");
         DefaultWebSecurityManager manager = new DefaultWebSecurityManager();
         // 使用自己的realm
         manager.setRealm(realm);
@@ -39,7 +39,7 @@ public class ShiroConfig {
 
     @Bean("shiroFilter")
     public ShiroFilterFactoryBean factory(DefaultWebSecurityManager securityManager) {
-        LOGGER.info("ShiroConfig/factory");
+        logger.debug("function[factory]");
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
 
         // 添加自己的过滤器并且取名为jwt
@@ -65,7 +65,7 @@ public class ShiroConfig {
     @Bean
     @DependsOn("lifecycleBeanPostProcessor")
     public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
-        LOGGER.info("ShiroConfig/defaultAdvisorAutoProxyCreator");
+        logger.debug("function[defaultAdvisorAutoProxyCreator]");
         DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
         defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
         return defaultAdvisorAutoProxyCreator;
@@ -73,13 +73,13 @@ public class ShiroConfig {
 
     @Bean
     public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        LOGGER.info("ShiroConfig/lifecycleBeanPostProcessor");
+        logger.debug("function[lifecycleBeanPostProcessor]");
         return new LifecycleBeanPostProcessor();
     }
 
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager) {
-        LOGGER.info("ShiroConfig/authorizationAttributeSourceAdvisor");
+        logger.debug("function[authorizationAttributeSourceAdvisor]");
         AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
         advisor.setSecurityManager(securityManager);
         return advisor;

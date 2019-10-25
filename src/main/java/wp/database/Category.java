@@ -4,16 +4,13 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-//@IdClass(wp.database.CategoryPK.class)
 @Table(name = "categories_tb")
 public class Category {
     @Id
-    //@GeneratedValue(strategy= GenerationType.AUTO)
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "category_id")
     private Integer id;
 
-    //@Id
     @Column(name = "user_id")
     private Integer userId;
 

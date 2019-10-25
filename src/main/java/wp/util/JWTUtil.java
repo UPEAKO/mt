@@ -12,14 +12,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 public class JWTUtil {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(JWTUtil.class);
+    private final static Logger logger = LoggerFactory.getLogger(JWTUtil.class);
 
     // 过期时间3小时
-    //注意超时抛出异常eg(com.auth0.jwt.exceptions.TokenExpiredException: The Token has expired on Fri Oct 11 23:52:49)
-    //导致重定向到401
     private static final long EXPIRE_TIME = 3*60*60*1000;
 
     public static boolean verify(String token, String username, String secret) {
+        logger.debug("function[verify]");
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -28,11 +27,13 @@ public class JWTUtil {
             DecodedJWT jwt = verifier.verify(token);
             return true;
         } catch (Exception exception) {
+            logger.warn("verify {}'s token[{}] fail",username,token);
             return false;
         }
     }
 
     public static String getUsername(String token) {
+        logger.debug("function[getUsername]");
         try {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("username").asString();
@@ -42,11 +43,10 @@ public class JWTUtil {
     }
 
     public static String sign(String username, String secret) {
-        LOGGER.info("JWTUtil/sign");
+        logger.debug("function[sign]");
         try {
             Date date = new Date(System.currentTimeMillis()+EXPIRE_TIME);
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            // 附带username信息
             return JWT.create()
                     .withClaim("username", username)
                     .withExpiresAt(date)
