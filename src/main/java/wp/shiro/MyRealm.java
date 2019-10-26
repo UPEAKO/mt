@@ -76,11 +76,15 @@ public class MyRealm extends AuthorizingRealm {
         if (username == null) {
             throw new AuthenticationException("token invalid");
         }
+        // FIXME myRealm为单例，不同的有效用户登录，查询数据库修改当前成员变量user，
+        // FIXME 若上一个用户修改了user,但未执行noteService功能前下一个用户再次修改user,add and update may wrong
+        // FIXME 查询官方文档-->realm单例
         user = userRepository.findUserByName(username);
         logger.info("myRealm'hashcode[{}]", this.hashCode());
         if (user == null) {
             throw new AuthenticationException("User didn't existed!");
         }
+        logger.debug("current user[userId({}),userName({})]'s hashcode[{}]", user.getId(),user.getName(),user.hashCode());
         if (! JWTUtil.verify(token, user.getName(), user.getPassword())) {
             throw new AuthenticationException("Username or password error");
         }

@@ -1,12 +1,8 @@
 'use strict';
 
-// TODO 适配移动端
-// TODO image上传
-// TODO 图片存储配合 nginx ???
-// TODO logout function
 
-//const baseUrl = "http://localhost:8080/";
-const baseUrl = "https://wypmk.xyz:8888/wp/";
+const baseUrl = "http://localhost:8080/";
+//const baseUrl = "https://wypmk.xyz:8888/wp/";
 const $body = $("body");
 const $multiList = $("#multiList");
 const $dialog = $("#dialog");
@@ -32,7 +28,7 @@ $dialog.dialog({
     closeOnEscape: false,
     modal: true,
     resizable: false,
-    width: 330,
+    width: 239,
     position: {
         my: "top",
         at: "top",
@@ -69,49 +65,51 @@ $body.on("click", ".x-wiki-index-item" ,function () {
         dataType: 'json',
         timeout: 10000,
         success: function (responseData) {
-            let noteId = responseData.data.noteId;
-            let noteTitle = responseData.data.noteTitle;
-            let noteContent = responseData.data.noteContent;
-            //设置标题及文章
-            $currentTitle.attr("noteId",noteId).text(noteTitle);
-            oldNoteId = noteId;
-            let $currentContent = $("<textarea style=\"display: none\"></textarea>");
-            $("#store-current-content").val(noteContent);
-            $currentContent.val(noteContent);
-            $("#content-editormd").html($currentContent);
-            toHtml();
+            if (responseData.code === 200) {
+                let noteId = responseData.data.noteId;
+                let noteTitle = responseData.data.noteTitle;
+                let noteContent = responseData.data.noteContent;
+                //设置标题及文章
+                $currentTitle.attr("noteId",noteId).text(noteTitle);
+                oldNoteId = noteId;
+                let $currentContent = $("<textarea style=\"display: none\"></textarea>");
+                $("#store-current-content").val(noteContent);
+                $currentContent.val(noteContent);
+                $("#content-editormd").html($currentContent);
+                toHtml();
+                if ($index.attr('isHidden') === 'false') {
+                    $sidebar.animate({left : "-65%"});
+                    $("#content").animate({left : "0"});
+                    $index.attr('isHidden', 'true');
+                }
+            }
+        },
+        error: function (jqXHR, textStatus) {
+            alert("get note wrong with textStatus: " + textStatus);
         }
     });
 });
-// 全屏内容时position非float，可使用left弹出list(这里滑屏)
-$body.on("touchstart",function (e) {
-    //从 chrome56 开始，在 window、document 和 body 上注册的 touchstart 和 touchmove 事件处理函数，会默认为是 passive: true。
-    //浏览器忽略 preventDefault() 就可以第一时间滚动了。
-    //e.preventDefault();
-    startX = e.originalEvent.changedTouches[0].pageX;
-    startY = e.originalEvent.changedTouches[0].pageY;
-});
-$body.on("touchmove",function (e) {
-    //e.preventDefault();
+// 点击"WP"弹出列表收回列表,注意on参数select只能是string
+$body.on("click", "#index",function () {
     if (window.innerWidth < 992) {
-        endX = e.originalEvent.changedTouches[0].pageX;
-        endY = e.originalEvent.changedTouches[0].pageY;
-        let X = endX - startX;
-        let Y = endY - startY;
-        if (X > 0 && Math.abs(X) > Math.abs(Y)) {
-            if ($index.attr('isHidden') === 'true') {
-                $sidebar.animate({left : "0"});
-                $("#content").animate({left : "65%"});
-                $index.attr('isHidden', 'false');
-            }
+        if ($index.attr('isHidden') === 'true') {
+            $sidebar.animate({left : "0"});
+            $("#content").animate({left : "65%"});
+            $index.attr('isHidden', 'false');
+        } else {
+            $sidebar.animate({left : "-65%"});
+            $("#content").animate({left : "0"});
+            $index.attr('isHidden', 'true');
         }
-        else if (X < 0 && Math.abs(X) > Math.abs(Y)) {
-            if ($index.attr('isHidden') === 'false') {
-                $sidebar.animate({left : "-65%"});
-                $("#content").animate({left : "0"});
-                $index.attr('isHidden', 'true');
-            }
-        }
+    }
+});
+// index.isHidden=false时点击content收回列表
+$body.on("click", "#content",function () {
+    console.log("click content");
+    if ($index.attr("isHidden") === "false") {
+        $sidebar.animate({left : "-65%"});
+        $("#content").animate({left : "0"});
+        $index.attr('isHidden', 'true');
     }
 });
 /* 所有加减号图标class点击缩放列表
@@ -125,26 +123,9 @@ $(".plus-minus-position").on("click", function () {
 $body.on("click", ".plus-minus-position" ,function () {
     toggle(this);
 });
-// 新建文章弹出编辑框
-$body.on("click","#create", function () {
-    $currentTitle.attr("noteId", "-1");
-    $("#overlay").css("display", "");
-    // id为-1,创建，大于0，修改
-    $("#content-editormd-editor").css("display", "");
-    $("#content-editormd-editor").empty();
-    $(setEditor(""));
-});
-// 修改文章弹出编辑框
-$body.on("click","#edit", function () {
-    let noteId = $currentTitle.attr("noteId");
-    if (noteId !== "-1") {
-        $("#overlay").css("display", "");
-        // id为-1,创建，大于0，修改
-        $("#content-editormd-editor").css("display", "");
-        // 清空之前渲染nodes
-        $("#content-editormd-editor").empty();
-        $(setEditor($("#store-current-content").val()));
-    }
+// 所有分类文字点击缩放列表
+$body.on("click", ".x-wiki-index-cat",function () {
+    toggle($(this).prev().get(0));
 });
 // 登出
 $body.on("click","#logout",function () {
@@ -155,6 +136,7 @@ $body.on("click","#logout",function () {
     alert("already logout!!!");
 });
 // 剪切板监听于document,只需添加一次监听
+/*
 document.addEventListener('paste', function (event) {
     let items = (event.clipboardData || window.clipboardData).items;
     let file = null;
@@ -174,30 +156,64 @@ document.addEventListener('paste', function (event) {
         alert("粘贴内容非图片");
         return;
     }
-    // 此时file就是我们的剪切板中的图片对象
-    // 如果需要预览，可以执行下面代码
-    let reader = new FileReader();
-    reader.onload = function (event) {
-        let base64Url = reader.result;
-        let img = new Image();
-        img.src = base64Url;
-        // 如果图片被缓存，则直接返回缓存数据
-        if(img.complete){
-            preview(img.width, img.height,base64Url,file);
-        }else{
-            // 完全加载完毕的事件
-            img.onload = function(){
-                preview(img.width, img.height,base64Url,file);
+    preview(file,true);
+});
+
+ */
+$body.on("paste",function (event) {
+    let items = event.originalEvent.clipboardData.items;
+    let file = null;
+    if (items && items.length) {
+        // 搜索剪切板items
+        for (let i = 0; i < items.length; i++) {
+            // String 查询字串，否则返回-1
+            if (items[i].type.indexOf('image') !== -1) {
+                file = items[i].getAsFile();
+                break;
             }
         }
-    };
-    reader.readAsDataURL(file);
+    } else {
+        alert("当前浏览器不支持");
+        return;
+    }
+    if (!file) {
+        alert("粘贴内容非图片");
+        return;
+    }
+    preview(file,true);
+});
+// 新建文章弹出编辑框
+$body.on("click","#create", function () {
+    $currentTitle.attr("noteId", "-1");
+    $("#overlay").css("display", "");
+    // id为-1,创建，大于0，修改
+    $("#content-editormd-editor").css("display", "");
+    $("#content-editormd-editor").empty();
+    if (window.innerWidth > 600) {
+        $(setEditor(""));
+    } else {
+        $(setMinEditor(""));
+    }
+});
+// 修改文章弹出编辑框
+$body.on("click","#edit", function () {
+    let noteId = $currentTitle.attr("noteId");
+    if (noteId !== "-1") {
+        $("#overlay").css("display", "");
+        // id为-1,创建，大于0，修改
+        $("#content-editormd-editor").css("display", "");
+        // 清空之前渲染nodes
+        $("#content-editormd-editor").empty();
+        if (window.innerWidth > 600) {
+            $(setEditor($("#store-current-content").val()));
+        } else {
+            $(setMinEditor($("#store-current-content").val()));
+        }
+    }
 });
 
 
-/**
- * 自定义tool bar
- */
+// 编辑器自定义tool bar
 function setEditor(markdown) {
     wpEditor = editormd("content-editormd-editor", {
         markdown: markdown,
@@ -210,9 +226,9 @@ function setEditor(markdown) {
         syncScrolling : true,// true -> bisync, false -> disabled, "single" -> Only editor area sync
         path    : "lib/",
         saveHTMLToTextarea : false,//true则自动生成另一个textarea保存html的内容，则在同一个form中都会上传到后台
-        imageUpload : true,
-        imageFormats: ["jpg","jpeg","gif","png","bmp","webp"],
-        imageUploadURL: "image",
+        //imageUpload : true,
+        //imageFormats: ["jpg","jpeg","gif","png","bmp","webp"],
+        //imageUploadURL: "image",
         htmlDecode: "style,script,iframe", //可以过滤标签解码
         emoji: true,
         taskList: true,
@@ -229,10 +245,93 @@ function setEditor(markdown) {
                 "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|",
                 "h1", "h2", "h3", "h4", "h5", "h6", "|",
                 "list-ul", "list-ol", "hr", "|",
-                "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime", "emoji", "html-entities", "pagebreak", "|",
+                "link", "reference-link", "code", "preformatted-text", "code-block", "table", "datetime", "emoji", "html-entities", "pagebreak", "|",
                 "goto-line", "watch", "preview", "fullscreen", "clear", "search", "|",
                 "help", "info",
-                "title","category","postIcon","deleteIcon","||", "closeIcon"];
+                "title","category","postIcon", "imageIcon","deleteIcon","||", "closeIcon"];
+        },
+        toolbarIconsClass : {
+            postIcon : "fa-caret-square-up",
+            imageIcon : "fa-image",
+            deleteIcon : "fa-trash",
+            closeIcon : "fa-window-close"  // 指定一个FontAawsome的图标类
+        },
+        // 用于增加自定义工具栏的功能，可以直接插入HTML标签，不使用默认的元素创建图标
+        toolbarCustomIcons : {
+            title   : "<input id=\"title\" type=\"text\" class=\"input\" placeholder=\"title\" >",
+            category :   "<input id=\"category\" type=\"text\" class=\"input\" placeholder=\"category\">"
+        },
+
+        lang : {
+            toolbar : {
+                file : "upload file",
+                postIcon : "upload note",  // 自定义按钮的提示文本，即title属性
+                imageIcon : "upload image",
+                deleteIcon : "delete note",
+                closeIcon: "close this editor"
+            }
+        },
+
+        // 自定义工具栏按钮的事件处理
+        toolbarHandlers : {
+            postIcon : postOrPutNote,
+            imageIcon : chooseImage,
+            deleteIcon : deleteNote,
+            closeIcon : function () {
+                // 全屏编辑后未退出，直接关闭窗口导致首页无法滚动，故关闭窗口前先退出全屏
+                wpEditor.fullscreenExit();
+                $("#overlay").css("display", "none");
+                $editor.css("display", "none");
+                $currentTitle.attr("noteId", oldNoteId);
+            }
+        },
+
+        // 加载完成回调事件
+        onload : onLoad,
+
+        // 全屏回调事件，这里主要调整left top值
+        onfullscreen : function() {
+            if (window.innerWidth > 600) {
+                $editor.css("top",0).css("left",0);
+            }
+        },
+
+        onfullscreenExit : function() {
+            if (window.innerWidth > 600) {
+                $editor.css("top","5%").css("left","5%");
+            }
+        }
+    });
+}
+// 移动端编辑器自定义toolbar
+function setMinEditor(markdown) {
+    wpEditor = editormd("content-editormd-editor", {
+        markdown: markdown,
+        theme: "dark",
+        //previewTheme : "dark",
+        //editorTheme : "pastel-on-dark",
+        tocm: true,
+        width   : "100%",
+        height  : "100%",
+        syncScrolling : true,// true -> bisync, false -> disabled, "single" -> Only editor area sync
+        path    : "lib/",
+        saveHTMLToTextarea : false,//true则自动生成另一个textarea保存html的内容，则在同一个form中都会上传到后台
+        htmlDecode: "style,script,iframe", //可以过滤标签解码
+        emoji: true,
+        taskList: true,
+        tex: true,               // 默认不解析
+        flowChart: true,         // 默认不解析
+        sequenceDiagram: true, // 默认不解析
+        codeFold: true,
+        // 自定义toolbar
+        toolbarIcons : function() {
+            // Or return editormd.toolbarModes[name]; // full, simple, mini
+            // Using "||" set icons align right.
+            return [
+                "title","category",
+                "watch", "preview", "search", "code-block", "table", "datetime",
+                "postIcon","deleteIcon",
+                "||", "closeIcon"];
         },
         toolbarIconsClass : {
             postIcon : "fa-caret-square-up",
@@ -260,8 +359,6 @@ function setEditor(markdown) {
             postIcon : postOrPutNote,
             deleteIcon : deleteNote,
             closeIcon : function () {
-                // 全屏编辑后未退出，直接关闭窗口导致首页无法滚动，故关闭窗口前先退出全屏
-                wpEditor.fullscreenExit();
                 $("#overlay").css("display", "none");
                 $editor.css("display", "none");
                 $currentTitle.attr("noteId", oldNoteId);
@@ -270,15 +367,6 @@ function setEditor(markdown) {
 
         // 加载完成回调事件
         onload : onLoad,
-
-        // 全屏回调事件，这里主要调整left top值
-        onfullscreen : function() {
-            $editor.css("top",0).css("left",0);
-        },
-
-        onfullscreenExit : function() {
-            $editor.css("top","5%").css("left","5%");
-        }
     });
 }
 // collapse or expand list
@@ -333,10 +421,15 @@ function getToken() {
         //The JSON.stringify() method converts a JavaScript object or value to a JSON string，满足json解析要求
         data: JSON.stringify(userWrap),
         success: function (responseData) {
-            token = responseData.data;
-            getList();
-            //登录成功时调用关闭dialog
-            $dialog.dialog("close");
+            if (responseData.code === 200) {
+                token = responseData.data;
+                getList();
+                //登录成功时调用关闭dialog
+                $dialog.dialog("close");
+            }
+        },
+        error: function (jqXHR, textStatus) {
+            alert("get token wrong with textStatus: " + textStatus);
         }
     });
 }
@@ -425,70 +518,89 @@ function toHtml() {
     });
 }
 // 设置dialog预览图片并上传
-function preview(width,height,base64Url,file) {
-    console.log("------------------------------preview-----------------------------------");
-    let maxBase = 500;
-    if (width > maxBase) {
-        height = maxBase * height / width;
-        width = maxBase;
-    } else if (height) {
-        width = maxBase * width / height;
-        height = maxBase;
+function preview(file,isScreenShot) {
+    let reg = /(.*)\.(jpg|jpeg|gif|png|PNG|bmp|webp)$/;
+    if (!reg.test(file.name)) {
+        alert("wrong file type!!!");
+        $("#imageChoose")[0].value = '';
+        return;
     }
-    const $preview = $('<img>');
-    // 创建dialog进行预览
-    $preview.dialog({
-        closeOnEscape: false,
-        modal: true,
-        width: width + 10,
-        height: height + 100,
-        buttons: [
-            {
-                text: "cancel",
-                click: function() {
-                    $preview.dialog('destroy');
-                }
-            },
-            {
-                text: "upload",
-                click: function() {
-                    let formData = new FormData();
-                    // 截图默认文件名均为image.png,修改为时间命名
-                    let newFile = new File([file], new Date().getTime()+".png",{type:"image/png"});
-                    formData.append('image',newFile);
-                    $.ajax({
-                        url: baseUrl + userName + "/image",
-                        method: "POST",
-                        headers: {
-                            Authorization: token
-                        },
-                        dataType: 'json',
-                        timeout: 10000,
-
-                        // form data
-                        data: formData,
-
-                        // jQuery会将data对象转换为字符串来发送HTTP请求，
-                        // 默认情况下会用 application/x-www-form-urlencoded编码来进行转换
-                        // 上传二进制数据需禁用
-                        enctype: 'multipart/form-data',
-                        processData: false,
-                        contentType: false,
-
-                        success: function (responseData) {
-                            if (responseData.code === 200) {
-                                wpEditor.insertValue("![](" + responseData.data + ")\n");
-                                $preview.dialog('destroy');
-                                console.log("preview destroy");
-                            }
+    let reader = new FileReader();
+    // fileReader readAsUrl need time, so onload
+    reader.onload = function () {
+        let base64Url = reader.result;
+        let img = new Image();
+        img.src = base64Url;
+        // Image load base64 source need time, so onload
+        img.onload = function() {
+            let width = img.width;
+            let height = img.height;
+            let base = 500;
+            let maxBase = width < height ? height : width;
+            width = width * base / maxBase;
+            height = height * base / maxBase;
+            const $preview = $('<img>');
+            // 创建dialog进行预览
+            $preview.dialog({
+                closeOnEscape: false,
+                modal: true,
+                width: width + 10,
+                height: height + 100,
+                buttons: [
+                    {
+                        text: "cancel",
+                        click: function() {
+                            $preview.dialog('destroy');
                         }
-                    });
-                }
-            }
-        ]
-    });
-    // dialog会修改下列属性，故须在dialog之后才能覆盖
-    $preview.attr("src",base64Url).css("width",width,"height",height);
+                    },
+                    {
+                        text: "upload",
+                        click: function() {
+                            let formData = new FormData();
+                            if (isScreenShot) {
+                                // 截图默认文件名均为image.png,修改为时间命名
+                                file = new File([file], new Date().getTime()+".png",{type:"image/png"});
+                            } else {
+                                // 文件名添加时间前缀，防止同名文件覆盖
+                                file = new File([file], new Date().getTime() + '-' + file.name, {type: file.type});
+                            }
+                            formData.append('image',file);
+                            $.ajax({
+                                url: baseUrl + userName + "/image",
+                                method: "POST",
+                                headers: {
+                                    Authorization: token
+                                },
+                                dataType: 'json',
+                                timeout: 10000,
+
+                                // form data
+                                data: formData,
+
+                                // jQuery会将data对象转换为字符串来发送HTTP请求，
+                                // 默认情况下会用 application/x-www-form-urlencoded编码来进行转换
+                                // 上传二进制数据需禁用
+                                enctype: 'multipart/form-data',
+                                processData: false,
+                                contentType: false,
+
+                                success: function (responseData) {
+                                    if (responseData.code === 200) {
+                                        wpEditor.insertValue("![](" + responseData.data + ")\n");
+                                        $preview.dialog('destroy');
+                                        console.log("preview destroy");
+                                    }
+                                }
+                            });
+                        }
+                    }
+                ]
+            });
+            // dialog会修改下列属性，故须在dialog之后才能覆盖
+            $preview.attr("src",base64Url).css("width",width,"height",height);
+        };
+    };
+    reader.readAsDataURL(file);
 }
 /**
  * @param {Object}      cm         CodeMirror对象
@@ -541,23 +653,29 @@ function postOrPutNote(cm, icon, cursor, selection) {
         timeout: 10000,
         data: JSON.stringify(addWrap),
         success: function (responseData) {
-            // 设置currentTitle,currentContent,currentTitle.noteId
-            $currentTitle.attr("noteId",responseData.data.id).text(responseData.data.title);
-            oldNoteId = responseData.data.id;
-            // 渲染后textarea被editormd删除，且由于toHtml函数无法三层传递参数，故每次新建textarea节点
-            let $currentContent = $("<textarea style=\"display: none\"></textarea>");
-            $("#store-current-content").val(noteContent);
-            $currentContent.val(noteContent);
-            //由append节点改为html替换，由于append导致内容叠加而非替换
-            $("#content-editormd").html($currentContent);
-            console.log($currentContent.val());
-            toHtml();
-            // 更新列表
-            // 如果是更新文章，即分类列表中存在该标题，先删除
-            if (noteId !== "-1") {
-                removeToUp($("#title" + noteId));
+            if (responseData.code === 200) {
+                // 设置currentTitle,currentContent,currentTitle.noteId
+                $currentTitle.attr("noteId",responseData.data.id).text(responseData.data.title);
+                oldNoteId = responseData.data.id;
+                // 渲染后textarea被editormd删除，且由于toHtml函数无法三层传递参数，故每次新建textarea节点
+                let $currentContent = $("<textarea style=\"display: none\"></textarea>");
+                $("#store-current-content").val(noteContent);
+                $currentContent.val(noteContent);
+                //由append节点改为html替换，由于append导致内容叠加而非替换
+                $("#content-editormd").html($currentContent);
+                console.log($currentContent.val());
+                toHtml();
+                // 更新列表
+                // 如果是更新文章，即分类列表中存在该标题，先删除
+                if (noteId !== "-1") {
+                    removeToUp($("#title" + noteId));
+                }
+                setCategory(responseData.data);
+                alert("note already post!!!");
             }
-            setCategory(responseData.data);
+        },
+        error: function (jqXHR, textStatus) {
+            alert("post note fail with textStatus: " + textStatus);
         }
     });
 }
@@ -582,20 +700,16 @@ function deleteNote() {
         success: function (responseData) {
             if (responseData.code === 200) {
                 removeToUp($("#title" + noteId));
+                alert("already delete note " + noteId);
             }
+        },
+        error: function (jqXHR, textStatus) {
+            alert("delete note fail with textStatus: " + textStatus);
         }
     });
 }
 // 编辑器加载完成回调
 function onLoad(){
-    /*
-    $("[type=\"file\"]").bind("change", function(){
-        alert($(this).val());
-        wpEditor.cm.replaceSelection($(this).val());
-        console.log($(this).val(), wpEditor);
-    });
-     */
-
     let noteId = $currentTitle.attr("noteId");
     if (noteId !== "-1") {
         // 注意text(),html(),val()-->针对表单
@@ -624,4 +738,16 @@ function removeToUp($currentItem) {
         }
         removeToUp($parent);
     }
+}
+// 选择上传的图片
+function chooseImage() {
+    console.log("---------get in chooseImage function--------");
+    $body.on("change", "#imageChoose",function () {
+        console.log("---------get in chooseImage change function--------");
+        let file = this.files[0];
+        preview(file,false);
+        // 最后将input元素的value清空，防止下次相同文件不触发change事件
+        this.value = '';
+    });
+    $("#imageChoose").click();
 }

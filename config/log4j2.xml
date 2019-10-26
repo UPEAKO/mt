@@ -9,13 +9,10 @@
         </File>
     </Appenders>
     <Loggers>
-        <!-- name:包名或全限定类名
-        <Logger name="wp" level="warn">
+        <!-- name:包名或全限定类名-->
+        <Logger name="wp" level="info">
             <AppenderRef ref="Console"/>
         </Logger>
-        -->
-        <Root level="debug">
-            <AppenderRef ref="Console"/>
-        </Root>
+        <Root level="debug"/>
     </Loggers>
 </Configuration>
