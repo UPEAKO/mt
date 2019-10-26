@@ -2,7 +2,7 @@
 
 
 const baseUrl = "http://localhost:8080/";
-//const baseUrl = "https://wypmk.xyz:8888/wp/";
+
 const $body = $("body");
 const $multiList = $("#multiList");
 const $dialog = $("#dialog");
