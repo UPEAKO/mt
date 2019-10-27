@@ -23,7 +23,7 @@ public class UserService {
     }
 
     public ResponseBean authenticateUser(String userName, String passWord) {
-        logger.debug("function[authenticateUser]");
+        logger.debug("step into");
         User user = userRepository.findUserByName(userName);
         if (user == null) {
             logger.warn("current user[{}] does not exist", userName);

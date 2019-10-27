@@ -29,20 +29,20 @@ public class MyRealm extends AuthorizingRealm {
     private User user;
 
     public User getUser() {
-        logger.debug("function[getUser]");
+        logger.debug("step into");
         return user;
     }
 
     @Autowired
     public MyRealm(UserRepository userRepository) {
-        logger.debug("function[MyRealm]");
+        logger.debug("step into");
         logger.info("create MyRealm,hashcode[{}]",this.hashCode());
         this.userRepository = userRepository;
     }
 
     @Override
     public boolean supports(AuthenticationToken token) {
-        logger.debug("function[supports]");
+        logger.debug("step into");
         return token instanceof JWTToken;
     }
 
@@ -52,7 +52,7 @@ public class MyRealm extends AuthorizingRealm {
     // FIXME doGetAuthorizationInfo每次请求都重复执行4次
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        logger.debug("function[doGetAuthorizationInfo]");
+        logger.debug("step into");
         String username = JWTUtil.getUsername(principals.toString());
         if (!user.getName().equals(username)) {
             throw new UnauthorizedException();
@@ -70,7 +70,7 @@ public class MyRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-        logger.debug("function[doGetAuthenticationInfo]");
+        logger.debug("step into");
         String token = (String) auth.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (username == null) {

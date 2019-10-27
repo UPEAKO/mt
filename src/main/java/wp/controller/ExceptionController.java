@@ -24,7 +24,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ShiroException.class)
     public ResponseBean handle401(ShiroException e) {
-        logger.debug("function[handle401(ShiroException e)]");
+        logger.debug("step into");
         logger.warn(e.getMessage());
         return new ResponseBean(401, e.getMessage(), null);
     }
@@ -33,7 +33,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseBean handle401() {
-        logger.debug("function[handle401]");
+        logger.debug("step into");
         logger.warn("Unauthorized");
         return new ResponseBean(401, "Unauthorized", null);
     }
@@ -41,7 +41,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoteNotExistException.class)
     public ResponseBean handle404() {
-        logger.debug("function[handle404]");
+        logger.debug("step into");
         logger.warn("note not exist");
         return new ResponseBean(404, "note not exist", null);
     }
@@ -49,7 +49,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(NoteAlreadyExistException.class)
     public ResponseBean handle409() {
-        logger.debug("function[handle409]");
+        logger.debug("step into");
         logger.warn("note already exist");
         return new ResponseBean(409, "note already exist", null);
     }
@@ -57,7 +57,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BadParamException.class})
     public ResponseBean handle400() {
-        logger.debug("function[handle400]");
+        logger.debug("step into");
         logger.warn("wrong param");
         return new ResponseBean(400, "wrong param", null);
     }
@@ -66,13 +66,13 @@ public class ExceptionController {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseBean globalException(HttpServletRequest request, Throwable ex) {
-        logger.debug("function[globalException]");
+        logger.debug("step into");
         logger.warn("other Exception");
         return new ResponseBean(getStatus(request).value(), ex.getMessage(), "other Exception");
     }
 
     private HttpStatus getStatus(HttpServletRequest request) {
-        logger.debug("function[getStatus]");
+        logger.debug("step into");
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         if (statusCode == null) {
             return HttpStatus.INTERNAL_SERVER_ERROR;

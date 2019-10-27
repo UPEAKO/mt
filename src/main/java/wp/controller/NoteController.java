@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import wp.bean.ResponseBean;
+import wp.service.DDNSService;
 import wp.service.ImageStorageService;
 import wp.service.NoteService;
 import wp.service.UserService;
@@ -30,17 +31,20 @@ public class NoteController {
 
     private ImageStorageService imageStorageService;
 
+    private DDNSService ddnsService;
+
     @Autowired
-    public NoteController(UserService userService, NoteService noteService, ImageStorageService imageStorageService) {
+    public NoteController(UserService userService, NoteService noteService, ImageStorageService imageStorageService,DDNSService ddnsService) {
         this.userService = userService;
         this.noteService = noteService;
         this.imageStorageService = imageStorageService;
+        this.ddnsService = ddnsService;
     }
 
 
     @PostMapping("/token")
     public ResponseBean login(@RequestBody UserWrap userWrap){
-        logger.debug("function[login]");
+        logger.debug("step into");
         return userService.authenticateUser(userWrap.getUserName(), userWrap.getUserPassword());
     }
 
@@ -49,7 +53,7 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean list(@PathVariable String user) {
-        logger.debug("function[list]");
+        logger.debug("step into");
         return noteService.getNoteList(user);
     }
 
@@ -58,7 +62,7 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean getNote(@PathVariable("id") Integer id, @PathVariable String user) {
-        logger.debug("function[getNote]");
+        logger.debug("step into");
         return noteService.getNoteById(id,user);
     }
 
@@ -67,7 +71,7 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean deleteNote(@PathVariable("id") Integer id, @PathVariable String user) {
-        logger.debug("function[deleteNote]");
+        logger.debug("step into");
         return noteService.deleteNoteById(id,user);
     }
 
@@ -76,7 +80,7 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean updateNote(@PathVariable("id") Integer id, @PathVariable String user, @RequestBody AddWrap addWrap) {
-        logger.debug("function[updateNote]");
+        logger.debug("step into");
         return noteService.updateNoteById(id, addWrap,user);
     }
 
@@ -85,7 +89,7 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean add(@RequestBody AddWrap addWrap, @PathVariable String user) {
-        logger.debug("function[add]");
+        logger.debug("step into");
         return noteService.addNote(addWrap,user);
     }
 
@@ -94,14 +98,19 @@ public class NoteController {
     @RequiresRoles("admin")
     @RequiresPermissions("all")
     public ResponseBean imageUpload(@RequestParam("image") MultipartFile file, @PathVariable String user) {
-        logger.debug("function[imageUpload]");
+        logger.debug("step into");
         return imageStorageService.store(file);
+    }
+
+    @GetMapping("ddns")
+    public ResponseBean getDDNSStatus() {
+        return ddnsService.getDDNSStatus();
     }
 
     @RequestMapping(path = "/401")
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseBean unauthorized() {
-        logger.debug("function[unauthorized]");
+        logger.debug("step into");
         return new ResponseBean(401, "Unauthorized401", null);
     }
 }

@@ -60,6 +60,15 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/jaxen/jaxen -->
+        <!-- jaxen用于dom4j xpath解析，注意版本1.2版本something wrong -->
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
     </dependencies>
 
     <properties>

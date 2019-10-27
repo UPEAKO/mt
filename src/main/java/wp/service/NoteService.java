@@ -43,7 +43,7 @@ public class NoteService {
     }
 
     public ResponseBean getNoteList(String user) {
-        logger.debug("function[getNoteList]");
+        logger.debug("step into");
         Integer userId = myRealm.getUser().getId();
         logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
         List<Object[]> notes = noteRepository.findNotes(userId);
@@ -67,7 +67,7 @@ public class NoteService {
 
 
     public ResponseBean deleteNoteById(Integer id,String user) {
-        logger.debug("function[deleteNoteById]");
+        logger.debug("step into");
         Integer userId = myRealm.getUser().getId();
         logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
         Note note = noteRepository.findNoteByIdAndUserId(id,userId);
@@ -84,7 +84,7 @@ public class NoteService {
     }
 
     public ResponseBean updateNoteById(Integer id, AddWrap addWrap,String user) {
-        logger.debug("function[updateNoteById]");
+        logger.debug("step into");
         Integer userId = myRealm.getUser().getId();
         logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
         String title = addWrap.getTitle();
@@ -125,7 +125,7 @@ public class NoteService {
     }
 
     public ResponseBean addNote(AddWrap addWrap,String user) {
-        logger.debug("function[addNote]");
+        logger.debug("step into");
         Integer userId = myRealm.getUser().getId();
         logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
         String title = addWrap.getTitle();
@@ -169,7 +169,7 @@ public class NoteService {
     }
 
     public ResponseBean getNoteById(Integer id,String user) {
-        logger.debug("function[getNoteById]");
+        logger.debug("step into");
         List<Object[]> note = noteRepository.findNote(id, myRealm.getUser().getId());
         logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
         if (note == null) {

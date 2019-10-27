@@ -18,7 +18,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
-        logger.debug("function[isLoginAttempt]");
+        logger.debug("step into");
         HttpServletRequest req = (HttpServletRequest) request;
         // FIXME "Authorization"关键字来自于父类默认实现，此处修改为其它"eg:auth"将导致token传到后面为空，具体原因待debug
         String authorization = req.getHeader("Authorization");
@@ -28,7 +28,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
-        logger.debug("function[executeLogin]");
+        logger.debug("step into");
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String authorization = httpServletRequest.getHeader("Authorization");
         JWTToken token = new JWTToken(authorization);
@@ -40,7 +40,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
-        logger.debug("function[isAccessAllowed]");
+        logger.debug("step into");
         // 无论是否使用controller中是否@RequiresAuthentication，本方法总执行
         if (isLoginAttempt(request, response)) {
             try {
@@ -58,7 +58,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-        logger.debug("function[preHandle]");
+        logger.debug("step into");
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader("Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
@@ -76,7 +76,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
      * 将非法请求跳转到 /401
      */
     private void response401(ServletRequest req, ServletResponse resp) {
-        logger.debug("function[response401]");
+        logger.debug("step into");
         try {
             HttpServletResponse httpServletResponse = (HttpServletResponse) resp;
             httpServletResponse.sendRedirect("/401");

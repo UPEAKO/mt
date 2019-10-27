@@ -24,7 +24,7 @@ public class ShiroConfig {
 
     @Bean("securityManager")
     public DefaultWebSecurityManager getManager(MyRealm realm) {
-        logger.debug("function[getManager]");
+        logger.debug("step into");
         DefaultWebSecurityManager manager = new DefaultWebSecurityManager();
         // 使用自己的realm
         manager.setRealm(realm);
@@ -39,7 +39,7 @@ public class ShiroConfig {
 
     @Bean("shiroFilter")
     public ShiroFilterFactoryBean factory(DefaultWebSecurityManager securityManager) {
-        logger.debug("function[factory]");
+        logger.debug("step into");
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
 
         // 添加自己的过滤器并且取名为jwt
@@ -65,7 +65,7 @@ public class ShiroConfig {
     @Bean
     @DependsOn("lifecycleBeanPostProcessor")
     public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
-        logger.debug("function[defaultAdvisorAutoProxyCreator]");
+        logger.debug("step into");
         DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
         defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
         return defaultAdvisorAutoProxyCreator;
@@ -73,13 +73,13 @@ public class ShiroConfig {
 
     @Bean
     public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        logger.debug("function[lifecycleBeanPostProcessor]");
+        logger.debug("step into");
         return new LifecycleBeanPostProcessor();
     }
 
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager) {
-        logger.debug("function[authorizationAttributeSourceAdvisor]");
+        logger.debug("step into");
         AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
         advisor.setSecurityManager(securityManager);
         return advisor;

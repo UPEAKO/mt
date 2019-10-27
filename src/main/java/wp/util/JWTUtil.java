@@ -18,7 +18,7 @@ public class JWTUtil {
     private static final long EXPIRE_TIME = 3*60*60*1000;
 
     public static boolean verify(String token, String username, String secret) {
-        logger.debug("function[verify]");
+        logger.debug("step into");
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -33,7 +33,7 @@ public class JWTUtil {
     }
 
     public static String getUsername(String token) {
-        logger.debug("function[getUsername]");
+        logger.debug("step into");
         try {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("username").asString();
@@ -43,7 +43,7 @@ public class JWTUtil {
     }
 
     public static String sign(String username, String secret) {
-        logger.debug("function[sign]");
+        logger.debug("step into");
         try {
             Date date = new Date(System.currentTimeMillis()+EXPIRE_TIME);
             Algorithm algorithm = Algorithm.HMAC256(secret);

@@ -27,7 +27,7 @@ public class ImageStorageService {
     private String baseUrl;
 
     public ResponseBean store(MultipartFile file) {
-        logger.debug("function[store]");
+        logger.debug("step into");
         logger.debug("root path inject into ImageStorageService is [{}]", root);
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         try {

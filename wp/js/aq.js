@@ -1,8 +1,8 @@
 'use strict';
 
-
+const isDebug = false;
 const baseUrl = "http://localhost:8080/";
-
+//const baseUrl = "https://wypmk.xyz:8888/wp/";
 const $body = $("body");
 const $multiList = $("#multiList");
 const $dialog = $("#dialog");
@@ -50,7 +50,7 @@ $body.on("click", ".x-wiki-index-item" ,function () {
     const $parentDiv = $item.parent();
     let title = $parentDiv.attr("id");
     let noteUrl = baseUrl + userName + "/notes/" + title.substring(5);
-    console.log(noteUrl);
+    if (isDebug) console.log(noteUrl);
     if (token === null) {
         alert("please login");
         return;
@@ -105,7 +105,6 @@ $body.on("click", "#index",function () {
 });
 // index.isHidden=false时点击content收回列表
 $body.on("click", "#content",function () {
-    console.log("click content");
     if ($index.attr("isHidden") === "false") {
         $sidebar.animate({left : "-65%"});
         $("#content").animate({left : "0"});
@@ -135,31 +134,7 @@ $body.on("click","#logout",function () {
     $currentTitle.empty();
     alert("already logout!!!");
 });
-// 剪切板监听于document,只需添加一次监听
-/*
-document.addEventListener('paste', function (event) {
-    let items = (event.clipboardData || window.clipboardData).items;
-    let file = null;
-    if (items && items.length) {
-        // 搜索剪切板items
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                file = items[i].getAsFile();
-                break;
-            }
-        }
-    } else {
-        alert("当前浏览器不支持");
-        return;
-    }
-    if (!file) {
-        alert("粘贴内容非图片");
-        return;
-    }
-    preview(file,true);
-});
-
- */
+// 剪切板监听
 $body.on("paste",function (event) {
     let items = event.originalEvent.clipboardData.items;
     let file = null;
@@ -406,7 +381,7 @@ function expandWikiNode(icon, rec) {
 }
 // ajax登录获取token
 function getToken() {
-    console.log("execute getToken");
+    if (isDebug) console.log("execute getToken");
     userName = $("#userName").val();
     let userWrap = {
         userName: userName,
@@ -457,8 +432,8 @@ function setCategory(eachNote) {
             // attr键值为字符串
             $currentNote.attr("id", "category" + String(categoryId));
             $currentNote.attr("categoryName", categoryName);
-            $currentNote.attr("expand",true);
             $currentNote.attr("depth",depth);
+            $currentNote.attr("expand",true);
             $currentNote.append("<i class=\"far fa-minus-square plus-minus-position\"></i>");
             $currentNote.append("<a class=\"x-wiki-index-cat\">" + categoryName +"</a>");
             $parentNote.append($currentNote);
@@ -476,7 +451,7 @@ function setCategory(eachNote) {
 }
 // 获取设置分类列表
 function getList() {
-    console.log("execute getList");
+    if (isDebug) console.log("execute getList");
     $.ajax({
         url: baseUrl+userName+"/notes",
         method: 'GET',
@@ -488,7 +463,7 @@ function getList() {
         timeout: 10000,
         success: function (responseData) {
             let code = responseData.code;
-            console.log(code);
+            if (isDebug) console.log(code);
             if (code === 200) {
                 // 设置multiList'content
                 $multiList.append("<i class=\"far fa-minus-square plus-minus-position\"></i>");
@@ -497,13 +472,17 @@ function getList() {
                 for (let i = 0; i < data.length; i++) {
                     setCategory(data[i]);
                 }
+                // 默认打开一级目录（先全收缩，再打开一级）
+                let icon = $('#multiList>i').get(0);
+                collapseWikiNode(icon, true);
+                toggle(icon);
             }
         }
     });
 }
 // 解析content-editormd下的markdown文本（参数超过3层无法传递?）
 function toHtml() {
-    console.log("execute toHtml");
+    if (isDebug) console.log("execute toHtml");
     $(function () {
         editormd.markdownToHTML("content-editormd", {
             tocm: true,
@@ -588,7 +567,7 @@ function preview(file,isScreenShot) {
                                     if (responseData.code === 200) {
                                         wpEditor.insertValue("![](" + responseData.data + ")\n");
                                         $preview.dialog('destroy');
-                                        console.log("preview destroy");
+                                        if (isDebug) console.log("preview destroy");
                                     }
                                 }
                             });
@@ -619,7 +598,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
     const categories = category.split("/");
     // 通过编辑器中的textarea的name属性获取相应noteContent
     const noteContent = $("[name=content-editormd-editor-markdown-doc]").val();
-    console.log(noteContent);
+    if (isDebug) console.log(noteContent);
     const noteTitle = $("#title").val();
     if (noteTitle.length === 0) {
         alert("title should not empty!!!")
@@ -637,7 +616,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
         noteUrl += noteId;
         method = "PUT";
     }
-    console.log(noteUrl);
+    if (isDebug) console.log(noteUrl);
     if (token === null) {
         alert("please login");
         return;
@@ -663,7 +642,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
                 $currentContent.val(noteContent);
                 //由append节点改为html替换，由于append导致内容叠加而非替换
                 $("#content-editormd").html($currentContent);
-                console.log($currentContent.val());
+                if (isDebug) console.log($currentContent.val());
                 toHtml();
                 // 更新列表
                 // 如果是更新文章，即分类列表中存在该标题，先删除
@@ -683,7 +662,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
 function deleteNote() {
     let noteId = $currentTitle.attr("noteId");
     let deleteUrl = baseUrl + userName + "/notes/" + noteId;
-    console.log(deleteUrl);
+    if (isDebug) console.log(deleteUrl);
     if (token === null) {
         alert("please login");
         return;
@@ -700,6 +679,8 @@ function deleteNote() {
         success: function (responseData) {
             if (responseData.code === 200) {
                 removeToUp($("#title" + noteId));
+                $("#content-editormd").empty();
+                $currentTitle.empty().attr("noteId", "-1");
                 alert("already delete note " + noteId);
             }
         },
@@ -733,17 +714,16 @@ function removeToUp($currentItem) {
     } else {
         if ($parent.children().length === 3) {
             $parent.empty();
+            removeToUp($parent);
         } else {
             $currentItem.remove();
         }
-        removeToUp($parent);
     }
 }
 // 选择上传的图片
 function chooseImage() {
-    console.log("---------get in chooseImage function--------");
+    if (isDebug) console.log("---------get in chooseImage function--------");
     $body.on("change", "#imageChoose",function () {
-        console.log("---------get in chooseImage change function--------");
         let file = this.files[0];
         preview(file,false);
         // 最后将input元素的value清空，防止下次相同文件不触发change事件
