@@ -1,5 +1,7 @@
 package wp.service;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import wp.exception.DeleteException;
 import wp.exception.NoteAlreadyExistException;
 import wp.exception.NoteNotExistException;
 import wp.shiro.MyRealm;
+import wp.util.JWTUtil;
 import wp.wrap.AddWrap;
 import wp.wrap.CategoryWrap;
 import wp.wrap.NoteCategoryWrap;
@@ -32,20 +35,20 @@ public class NoteService {
 
     private CategoryRepository categoryRepository;
 
-    private MyRealm myRealm;
-
     @Autowired
-    public NoteService(NoteRepository noteRepository, CategoryRepository categoryRepository, MyRealm myRealm) {
+    public NoteService(NoteRepository noteRepository, CategoryRepository categoryRepository) {
         this.noteRepository = noteRepository;
         this.categoryRepository = categoryRepository;
-        this.myRealm = myRealm;
-        logger.info("inject myRealm(hashcode[{}]) into NoteService(hashcode[{}])", this.myRealm.hashCode(),this.hashCode());
     }
 
-    public ResponseBean getNoteList(String user) {
+    public ResponseBean getNoteList(String user,String searchInfo) {
         logger.debug("step into");
-        Integer userId = myRealm.getUser().getId();
-        logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
+
+        if (!searchInfo.isEmpty()) {
+            return searchNotes(searchInfo);
+        }
+
+        Integer userId = getCurrentUserId();
         List<Object[]> notes = noteRepository.findNotes(userId);
         List<Object[]> categories = categoryRepository.findCategories(userId);
         List<NoteCategoryWrap> responseData = new ArrayList<>();
@@ -68,8 +71,7 @@ public class NoteService {
 
     public ResponseBean deleteNoteById(Integer id,String user) {
         logger.debug("step into");
-        Integer userId = myRealm.getUser().getId();
-        logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
+        Integer userId = getCurrentUserId();
         Note note = noteRepository.findNoteByIdAndUserId(id,userId);
         if (note == null) {
             throw new BadParamException();
@@ -85,8 +87,7 @@ public class NoteService {
 
     public ResponseBean updateNoteById(Integer id, AddWrap addWrap,String user) {
         logger.debug("step into");
-        Integer userId = myRealm.getUser().getId();
-        logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
+        Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
             throw new BadParamException();
@@ -126,8 +127,7 @@ public class NoteService {
 
     public ResponseBean addNote(AddWrap addWrap,String user) {
         logger.debug("step into");
-        Integer userId = myRealm.getUser().getId();
-        logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
+        Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
             throw new BadParamException();
@@ -170,14 +170,23 @@ public class NoteService {
 
     public ResponseBean getNoteById(Integer id,String user) {
         logger.debug("step into");
-        List<Object[]> note = noteRepository.findNote(id, myRealm.getUser().getId());
-        logger.info("current user[{}] | current myRealm's hashcode[{}]", user, myRealm.hashCode());
+        List<Object[]> note = noteRepository.findNote(id, getCurrentUserId());
         if (note == null) {
             logger.warn("note (with id {}) not exist", id);
             throw new NoteNotExistException();
         }
         return new ResponseBean(200, "get note success by id",
                 new NoteWrap((Integer) note.get(0)[0], (String) note.get(0)[1], (String) note.get(0)[2]));
+    }
+
+    private ResponseBean searchNotes(String searchInfo) {
+        logger.debug("step into");
+        logger.debug("searchInfo[{}]",searchInfo);
+        List<Note> notes = noteRepository.findNotesBySearchInfo(getCurrentUserId(),searchInfo);
+        if (notes == null || notes.isEmpty()) {
+            return new ResponseBean(404, "matching nothing with " + searchInfo, null);
+        }
+        return new ResponseBean(200,"get search result succeed", notes);
     }
 
     private int findParentCategory(Integer categoryId, List<Object[]> categories) {
@@ -187,5 +196,11 @@ public class NoteService {
             }
         }
         return -1;
+    }
+
+    private int getCurrentUserId() {
+        Subject subject = SecurityUtils.getSubject();
+        String token = subject.getPrincipal().toString();
+        return JWTUtil.getUserId(token);
     }
 }

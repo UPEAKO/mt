@@ -109,6 +109,33 @@
         border-radius: 10px;
         width: 150px;
     }
+
+    .search-container {
+        position: absolute;
+        width: 100%;
+        margin-top: 15px;
+        background: white;
+        box-shadow: 0 0 5px 5px black;
+        border-radius:1px;
+        display: none;
+    }
+
+    /*搜索框结果悬浮高亮否*/
+    a.search-result-item {
+        color: #333333;
+        text-decoration: none;
+        display: block;
+        font-size: medium;
+        padding: 3px 0 3px 10px;
+    }
+
+    a.search-result-item:hover {
+        background: #f3f3f3;
+    }
+
+    .search-result-info {
+        text-align: center;
+    }
 }
 
 /*large*/
@@ -179,16 +206,15 @@
 
     .sidebar-para {
           float: left;
-          padding-left: 1%;
-          width: 16.7%;
+          padding-left: 2%;
+          width: 18%;
           background: #fdfeff;
       }
 
     .content-para {
         float: left;
-        padding-left: 1%;
-        padding-right: 1%;
-        width: 83.3%;
+        margin-left: 8%;
+        width: 72%;
     }
 
     /*蒙层*/
@@ -218,6 +244,33 @@
         text-align: center;
         height: 1.7em;
         border-radius: 10px;
+    }
+
+    .search-container {
+        position: absolute;
+        width: 100%;
+        margin-top: 15px;
+        background: white;
+        box-shadow: 0 0 5px 5px black;
+        border-radius:1px;
+        display: none;
+    }
+
+    /*搜索框结果悬浮高亮否*/
+    a.search-result-item {
+        color: #333333;
+        text-decoration: none;
+        display: block;
+        font-size: medium;
+        padding: 3px 0 3px 10px;
+    }
+
+    a.search-result-item:hover {
+        background: #f3f3f3;
+    }
+
+    .search-result-info {
+        text-align: center;
     }
 }
 

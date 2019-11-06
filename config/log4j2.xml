@@ -17,8 +17,8 @@
     </Appenders>
     <Loggers>
         <!-- name:包名或全限定类名-->
-        <Logger name="wp" level="warn" additivity="false">
-            <AppenderRef ref="File"/>
+        <Logger name="wp" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
         </Logger>
         <!-- additivity:设置子logger不将日志再次输出到父logger -->
         <Logger name="wp.ddns" level="info" additivity="false">

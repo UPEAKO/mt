@@ -30,7 +30,7 @@ public class UserService {
             throw new UnauthorizedException();
         }
         if (passWord.equals(user.getPassword())) {
-            return new ResponseBean(200, "login success", JWTUtil.sign(userName, passWord));
+            return new ResponseBean(200, "login success", JWTUtil.sign(userName,user.getId(), passWord));
         } else {
             logger.info("user[{}] with password[{}] try to get token fail",userName,passWord);
             throw new UnauthorizedException();

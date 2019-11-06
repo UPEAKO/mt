@@ -13,8 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-// TODO  似乎未正常执行，添加log调试原因
-
 @Service
 public class Detection {
 
@@ -60,7 +58,7 @@ public class Detection {
         if (result.isEmpty()) {
             throw new Exception("get nothing from " + baseListUrl);
         }
-        LOGGER.warn("raw xml source from namesilo: [{}]", result);
+        LOGGER.info("raw xml source from namesilo: [{}]", result);
         Document document = DocumentHelper.parseText(result);
         Node NCode = document.selectSingleNode("/namesilo/reply/code");
         String code = NCode.getText();
@@ -78,7 +76,7 @@ public class Detection {
         if (result1.isEmpty())  {
             throw new Exception("get empty xml resource from namesilo");
         }
-        LOGGER.warn("raw xml source from namesilo: [{}]", result1);
+        LOGGER.info("raw xml source from namesilo: [{}]", result1);
         document = DocumentHelper.parseText(result1);
         NCode = document.selectSingleNode("/namesilo/reply/code");
         code = NCode.getText();
@@ -91,7 +89,7 @@ public class Detection {
         if (result2.isEmpty())  {
             throw new Exception("get empty xml resource from namesilo");
         }
-        LOGGER.warn("raw xml source from namesilo: [{}]", result2);
+        LOGGER.info("raw xml source from namesilo: [{}]", result2);
         document = DocumentHelper.parseText(result2);
         NCode = document.selectSingleNode("/namesilo/reply/code");
         code = NCode.getText();
@@ -112,7 +110,7 @@ public class Detection {
             }
             else {
                 // 输出getCurrentIP原始数据
-                LOGGER.warn("raw xml source from namesilo: [{}]", resultOldIP);
+                LOGGER.info("raw xml source from namesilo: [{}]", resultOldIP);
                 Document document = DocumentHelper.parseText(resultOldIP);
                 LOGGER.debug("start parse xml resource at getCurrentIP() function");
                 Node NCode = document.selectSingleNode("/namesilo/reply/code");

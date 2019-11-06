@@ -18,26 +18,25 @@ import wp.database.UserRepository;
 import wp.util.JWTUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.function.Consumer;
 
 @Service
 public class MyRealm extends AuthorizingRealm {
 
     private final static Logger logger = LoggerFactory.getLogger(MyRealm.class);
 
-    private UserRepository userRepository;
-
-    private User user;
-
-    public User getUser() {
-        logger.debug("step into");
-        return user;
-    }
+    private HashMap<String,User> cacheUsers = new HashMap<>(1);
 
     @Autowired
     public MyRealm(UserRepository userRepository) {
         logger.debug("step into");
-        logger.info("create MyRealm,hashcode[{}]",this.hashCode());
-        this.userRepository = userRepository;
+        Iterable<User> users = userRepository.findAll();
+        users.forEach(user -> {
+            cacheUsers.put(user.getName(),user);
+            logger.warn("put user[{}]  from db to cacheUsers",user.getName());
+        });
     }
 
     @Override
@@ -53,8 +52,10 @@ public class MyRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         logger.debug("step into");
+        // FIXME the principal is token,not userName
         String username = JWTUtil.getUsername(principals.toString());
-        if (!user.getName().equals(username)) {
+        User user = cacheUsers.get(username);
+        if (user == null || !user.getName().equals(username)) {
             throw new UnauthorizedException();
         }
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
@@ -76,16 +77,13 @@ public class MyRealm extends AuthorizingRealm {
         if (username == null) {
             throw new AuthenticationException("token invalid");
         }
-        // FIXME myRealm为单例，不同的有效用户登录，查询数据库修改当前成员变量user，
-        // FIXME 若上一个用户修改了user,但未执行noteService功能前下一个用户再次修改user,add and update may wrong
-        // FIXME 查询官方文档-->realm单例
-        user = userRepository.findUserByName(username);
+        User user = cacheUsers.get(username);
         logger.info("myRealm'hashcode[{}]", this.hashCode());
         if (user == null) {
             throw new AuthenticationException("User didn't existed!");
         }
         logger.debug("current user[userId({}),userName({})]'s hashcode[{}]", user.getId(),user.getName(),user.hashCode());
-        if (! JWTUtil.verify(token, user.getName(), user.getPassword())) {
+        if (! JWTUtil.verify(token,user.getPassword())) {
             throw new AuthenticationException("Username or password error");
         }
 

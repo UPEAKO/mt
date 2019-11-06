@@ -1,8 +1,8 @@
 'use strict';
 
 const isDebug = false;
-const baseUrl = "http://localhost:8080/";
-//const baseUrl = "https://wypmk.xyz:8888/wp/";
+//const baseUrl = "http://localhost:8080/";
+const baseUrl = "https://wypmk.xyz:8888/wp/";
 const $body = $("body");
 const $multiList = $("#multiList");
 const $dialog = $("#dialog");
@@ -11,13 +11,16 @@ const $header = $("#header");
 const $sidebar = $("#sidebar");
 const $index = $("#index");
 const $editor = $("#content-editormd-editor");
-let startX,endX,startY,endY;
+const $searchContainer = $("#search-container");
+const $searchInfo = $("#search-info");
 // 全局存储token,userName
 let token,userName;
 // 直接关闭窗口，未上传，重置NoteID（由于每次create都将noteId置为-1，保证create时url为post而非put）
 let oldNoteId = "-1";
 // editor object
 let wpEditor;
+// cache current notes by searchInfo
+let notes;
 
 
 // 设置sidebar与row1高度占满，用于分割线
@@ -77,6 +80,7 @@ $body.on("click", ".x-wiki-index-item" ,function () {
                 $currentContent.val(noteContent);
                 $("#content-editormd").html($currentContent);
                 toHtml();
+                // 对桌面端的css无效，故无需判断window.width
                 if ($index.attr('isHidden') === 'false') {
                     $sidebar.animate({left : "-65%"});
                     $("#content").animate({left : "0"});
@@ -129,9 +133,12 @@ $body.on("click", ".x-wiki-index-cat",function () {
 // 登出
 $body.on("click","#logout",function () {
     token = null;
+    notes = null;
     $("#content-editormd").empty();
     $multiList.empty();
     $currentTitle.empty();
+    $searchContainer.empty();
+    $searchContainer.css("display","none");
     alert("already logout!!!");
 });
 // 剪切板监听
@@ -152,7 +159,7 @@ $body.on("paste",function (event) {
         return;
     }
     if (!file) {
-        alert("粘贴内容非图片");
+        if(isDebug) alert("粘贴内容非图片");
         return;
     }
     preview(file,true);
@@ -185,6 +192,29 @@ $body.on("click","#edit", function () {
             $(setMinEditor($("#store-current-content").val()));
         }
     }
+});
+// 监听搜索框输入清空，清除搜索结果
+$body.on("input","#search-info", function () {
+    if ($searchContainer.val() === "") {
+        $searchContainer.css("display","none");
+    }
+});
+// search button
+$body.on("click", "#search-button", search);
+// 点击查询结果item设置其内容
+$body.on("click",".search-result-item",function () {
+    let noteLocation = $(this).attr("searchNoteId");
+    let noteId = notes[noteLocation].id;
+    let noteTitle = notes[noteLocation].title;
+    let noteContent = notes[noteLocation].content;
+    //设置标题及文章
+    $currentTitle.attr("noteId",noteId).text(noteTitle);
+    oldNoteId = noteId;
+    let $currentContent = $("<textarea style=\"display: none\"></textarea>");
+    $("#store-current-content").val(noteContent);
+    $currentContent.val(noteContent);
+    $("#content-editormd").html($currentContent);
+    toHtml();
 });
 
 
@@ -453,13 +483,13 @@ function setCategory(eachNote) {
 function getList() {
     if (isDebug) console.log("execute getList");
     $.ajax({
-        url: baseUrl+userName+"/notes",
+        url: `${baseUrl}${userName}/notes?searchInfo`,
         method: 'GET',
         headers: {
             Authorization: token
         },
-        contentType: 'application/json',
         dataType: 'json',
+        data: "",
         timeout: 10000,
         success: function (responseData) {
             let code = responseData.code;
@@ -730,4 +760,51 @@ function chooseImage() {
         this.value = '';
     });
     $("#imageChoose").click();
+}
+// search
+function search() {
+    if (isDebug) console.log(`step into search function`);
+    let searchInfo = $searchInfo.val();
+    if (searchInfo === "") {
+        alert("searchInfo should not empty!!!");
+        return;
+    }
+    $.ajax({
+        url: `${baseUrl}${userName}/notes?searchInfo=${searchInfo}`,
+        method: 'GET',
+        headers: {
+            Authorization: token
+        },
+        dataType: 'json',
+        timeout: 10000,
+        success: function (responseData) {
+            let code = responseData.code;
+            if (isDebug) console.log(code);
+            if (code === 200) {
+                $searchContainer.empty();
+                $searchContainer.css("display","block");
+                notes = responseData.data;
+                let $searchResultInfo = $("<h5 class='search-result-info'>");
+                $searchResultInfo.text(`${notes.length} matching`);
+                $searchContainer.append($searchResultInfo);
+                $searchContainer.append($("<hr>"));
+                for (let i = 0; i < notes.length; i++) {
+                    let $searchNoteItem = $("<a href=\"javascript:\" class=\"search-result-item\">");
+                    $searchNoteItem.text(notes[i].title);
+                    $searchNoteItem.attr("searchNoteId",i);
+                    $searchContainer.append($searchNoteItem);
+                }
+            } else if (code === 404) {
+                $searchContainer.empty();
+                $searchContainer.css("display","block");
+                let $searchResultInfo = $("<h5 class='search-result-info'>");
+                $searchResultInfo.text(`nothing matching`);
+                $searchContainer.append($searchResultInfo);
+                $searchContainer.append($("<hr>"));
+            }
+        },
+        error: function (jqXHR, textStatus) {
+            alert(`error code[${jqXHR.status}], textStatus[${textStatus}]`);
+        }
+    });
 }

@@ -19,7 +19,6 @@ import wp.wrap.UserWrap;
 
 
 // FIXME title & category都必须命名唯一，由于通过名称查询（目前名称重复直接导致提交失败）
-// FIXME 每次请求都要查询user,改为缓存（为null查询，否则不查）,使用redis
 @RestController
 public class NoteController {
 
@@ -42,7 +41,7 @@ public class NoteController {
     }
 
 
-    @PostMapping("/token")
+    @PostMapping("token")
     public ResponseBean login(@RequestBody UserWrap userWrap){
         logger.debug("step into");
         return userService.authenticateUser(userWrap.getUserName(), userWrap.getUserPassword());
@@ -52,9 +51,9 @@ public class NoteController {
     @RequiresAuthentication
     @RequiresRoles("admin")
     @RequiresPermissions("all")
-    public ResponseBean list(@PathVariable String user) {
+    public ResponseBean list(@PathVariable String user,@RequestParam("searchInfo") String searchInfo) {
         logger.debug("step into");
-        return noteService.getNoteList(user);
+        return noteService.getNoteList(user,searchInfo);
     }
 
     @GetMapping("{user}/notes/{id}")
