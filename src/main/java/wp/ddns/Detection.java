@@ -7,11 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import wp.ddns.iputil.IP;
 
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class Detection {
@@ -24,17 +27,16 @@ public class Detection {
     @Value("${wp.ddns.baseListUrl}")
     private String baseListUrl;
 
-    // 从域名服务商获取的ip
+    // old ip for differing with ip from ip server
     private String oldIP = "127.0.0.1";
 
-    // 是否已经初始化oldIP
     private boolean hasInitialIp = false;
 
-    // 自定义ip服务器url
+    // self ip server url
     @Value("${wp.ddns.ipUrl}")
     private String ipUrl;
 
-    // 是否ip服务器使用TLS加密,区别请求方法
+    // self ip server over tls
     @Value("${wp.ddns.isIpUrlOverTLS}")
     private boolean isIpUrlOverTLS;
 
@@ -51,7 +53,12 @@ public class Detection {
 
     private static int errorTimes = 0;
 
-    // ip改变，更新域名服务商处ip解析
+    private long lastSucceedTime;
+
+    @Value("${wp.ddns.selfIPServer}")
+    private boolean selfIPServer;
+
+    // ip change, update
     private boolean update(String newIP) throws Exception {
         LOGGER.debug("step into");
         String result = RequestUtil.httpsRequest(baseListUrl,"GET",null);
@@ -132,14 +139,23 @@ public class Detection {
                 }
             }
         }
+        // get current ip from open server
+        if (!selfIPServer) {
+            return IP.getCurrentIP();
+        }
         // 从自定义服务器获取currentIP
         String result;
         if (!isIpUrlOverTLS) {
             LOGGER.debug("get IP from [{}] not over TLS", ipUrl);
             result = RequestUtil.httpRequest(ipUrl,"GET",null);
-            // FIXME 长度判别改为正则表达式判别IP
-            if (result.isEmpty() || result.length() < 7) {
-                throw new Exception("get wrong ip from ip server not over TLS");
+            if (result.isEmpty()) {
+                throw new Exception("ip is empty");
+            } else {
+                Pattern pattern = Pattern.compile("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$");
+                Matcher matcher = pattern.matcher(result);
+                if (!matcher.matches()) {
+                    throw new Exception("wrong ip schema");
+                }
             }
             return result;
         } else {
@@ -154,9 +170,9 @@ public class Detection {
 
     public void detectionIpChange() {
         LOGGER.debug("step into");
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleWithFixedDelay(() ->{
-            // 捕获一切异常，出错该轮任务抛弃，等待下一轮任务
+            // catch all exception, discard current mission, wait next mission
             try {
                 String currentIP = getCurrentIP();
                 if (!currentIP.equals(oldIP)) {
@@ -175,11 +191,20 @@ public class Detection {
                     LOGGER.warn("the number[{}] successful schedule mission,current IP[{}],wait next mission", succeedMissionTimes, currentIP);
                 }
                 LOGGER.info("the number[{}] successful schedule mission,current IP[{}],wait next mission", succeedMissionTimes, currentIP);
+                // renew lastRightTime to current
+                lastSucceedTime = System.currentTimeMillis();
             } catch (Exception e) {
                 if (errorTimes == Integer.MAX_VALUE) {
                     errorTimes = 0;
                 }
                 errorTimes++;
+                if (System.currentTimeMillis() - lastSucceedTime > 60 * 60 * 1000) {
+                    selfIPServer = !selfIPServer;
+                    if (!selfIPServer) {
+                        succeedMissionTimes = Integer.MIN_VALUE;
+                        // TODO here mail to tell admin
+                    }
+                }
                 LOGGER.error("this schedule mission fail,wait next mission!!!Exception message[{}]",e.getMessage());
                 LOGGER.error("stackTrace", e);
             }
@@ -189,6 +214,7 @@ public class Detection {
         LOGGER.warn("updateBaseUrl[{}]", updateBaseUrl);
         LOGGER.warn("detection IP change start!!!");
         LOGGER.warn("{} is over TLS[{}], initDealy[{}], delay[{}]-->TimeUnit.MINUTES", ipUrl, isIpUrlOverTLS, initDelayTime, delayTime);
+        LOGGER.warn("use selfIPServer[{}]",selfIPServer);
     }
 
     public String getOldIP() {

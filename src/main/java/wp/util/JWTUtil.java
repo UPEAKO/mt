@@ -14,8 +14,8 @@ public class JWTUtil {
 
     private final static Logger logger = LoggerFactory.getLogger(JWTUtil.class);
 
-    // 过期时间3小时
-    private static final long EXPIRE_TIME = 3*60*60*1000;
+    // 过期时间6小时
+    private static final long EXPIRE_TIME = 6*60*60*1000;
 
     public static boolean verify(String token, String secret) {
         logger.debug("step into");

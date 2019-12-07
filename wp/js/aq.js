@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * sessionStorage 有效期在当前会话
+ */
+
 const isDebug = false;
 //const baseUrl = "http://localhost:8080/";
 const baseUrl = "https://wypmk.xyz:8888/wp/";
@@ -23,30 +27,8 @@ let wpEditor;
 let notes;
 
 
-// 设置sidebar与row1高度占满，用于分割线
-$("#row1").css("min-height", window.innerHeight - $header.height());
-$sidebar.css("min-height", window.innerHeight - $header.height());
-// 弹出登录框
-$dialog.dialog({
-    closeOnEscape: false,
-    modal: true,
-    resizable: false,
-    width: 239,
-    position: {
-        my: "top",
-        at: "top",
-        of: window
-    },
-    buttons: [
-        {
-            text: "Login",
-            click: function() {
-                //登录成功时调用关闭dialog
-                getToken();
-            }
-        }
-    ]
-});
+// login in
+login();
 // 获取设置note
 $body.on("click", ".x-wiki-index-item" ,function () {
     const $item = $(this);
@@ -134,6 +116,9 @@ $body.on("click", ".x-wiki-index-cat",function () {
 $body.on("click","#logout",function () {
     token = null;
     notes = null;
+    $("#backup").attr("href","#");
+    sessionStorage.removeItem('password');
+    sessionStorage.removeItem('hasLogin');
     $("#content-editormd").empty();
     $multiList.empty();
     $currentTitle.empty();
@@ -408,35 +393,6 @@ function expandWikiNode(icon, rec) {
             expandWikiNode(this, rec);
         });
     }
-}
-// ajax登录获取token
-function getToken() {
-    if (isDebug) console.log("execute getToken");
-    userName = $("#userName").val();
-    let userWrap = {
-        userName: userName,
-        userPassword: $("#passWord").val()
-    };
-    $.ajax({
-        url: baseUrl+'token',
-        method: 'POST',
-        contentType: 'application/json',
-        dataType: 'json',
-        timeout: 10000,
-        //The JSON.stringify() method converts a JavaScript object or value to a JSON string，满足json解析要求
-        data: JSON.stringify(userWrap),
-        success: function (responseData) {
-            if (responseData.code === 200) {
-                token = responseData.data;
-                getList();
-                //登录成功时调用关闭dialog
-                $dialog.dialog("close");
-            }
-        },
-        error: function (jqXHR, textStatus) {
-            alert("get token wrong with textStatus: " + textStatus);
-        }
-    });
 }
 // 设置分类列表公共方法
 function setCategory(eachNote) {
@@ -805,6 +761,80 @@ function search() {
         },
         error: function (jqXHR, textStatus) {
             alert(`error code[${jqXHR.status}], textStatus[${textStatus}]`);
+        }
+    });
+}
+// pre
+function pre() {
+    // 设置sidebar与row1高度占满，用于分割线
+    $("#row1").css("min-height", window.innerHeight - $header.height());
+    $sidebar.css("min-height", window.innerHeight - $header.height());
+}
+// login
+function login() {
+    userName = sessionStorage.getItem('username');
+    let password = sessionStorage.getItem('password');
+    if (userName !== null && password !== null) {
+        getToken(userName,password);
+    } else {
+        // 弹出登录框
+        $dialog.dialog({
+            closeOnEscape: false,
+            modal: true,
+            resizable: false,
+            width: 239,
+            position: {
+                my: "top",
+                at: "top",
+                of: window
+            },
+            buttons: [
+                {
+                    text: "Login",
+                    click: function() {
+                        userName = $("#userName").val();
+                        let password = $("#passWord").val();
+                        sessionStorage.setItem('username',userName);
+                        sessionStorage.setItem('password',password);
+                        //登录成功时调用关闭dialog
+                        getToken(userName,password);
+                    }
+                }
+            ]
+        });
+    }
+}
+// ajax登录获取token
+function getToken(userName,password) {
+    if (isDebug) console.log("execute getToken");
+    let userWrap = {
+        userName: userName,
+        userPassword: password
+    };
+    $.ajax({
+        url: baseUrl+'token',
+        method: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        timeout: 10000,
+        //The JSON.stringify() method converts a JavaScript object or value to a JSON string，满足json解析要求
+        data: JSON.stringify(userWrap),
+        success: function (responseData) {
+            if (responseData.code === 200) {
+                token = responseData.data;
+                // 设置backUrl
+                let backUpUrl = `${baseUrl}${userName}/backupfile?token=${token}`;
+                $("#backup").attr("href",backUpUrl);
+                getList();
+                if (sessionStorage.getItem('hasLogin') === null) {
+                    //登录成功时调用关闭dialog
+                    $dialog.dialog("close");
+                    sessionStorage.setItem('hasLogin','hasLogin');
+                }
+            }
+        },
+        error: function (jqXHR, textStatus) {
+            alert("get token wrong with textStatus: " + textStatus);
         }
     });
 }

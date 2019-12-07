@@ -22,7 +22,7 @@
         </Logger>
         <!-- additivity:设置子logger不将日志再次输出到父logger -->
         <Logger name="wp.ddns" level="info" additivity="false">
-            <AppenderRef ref="DDNS"/>
+            <AppenderRef ref="Console"/>
         </Logger>
         <Root level="error">
             <AppenderRef ref="ROOT"/>
