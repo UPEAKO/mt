@@ -26,7 +26,8 @@ let wpEditor;
 // cache current notes by searchInfo
 let notes;
 
-
+// pre
+pre();
 // login in
 login();
 // 获取设置note
