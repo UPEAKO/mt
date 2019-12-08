@@ -9,6 +9,11 @@
     box-sizing: border-box;
 }
 
+.my-toggle {
+    color: #70c383;
+    padding-right: 10px;
+}
+
 /*less*/
 @media (max-width: 600px) {
     #header {
@@ -142,6 +147,19 @@
 
 /*large*/
 @media (min-width: 600px) {
+    .my-back-color {
+        background-color: #f5f5d5 !important;
+    }
+
+    .my-toggle {
+        color: black;
+    }
+
+    .my-search-button {
+        color: #ffc107;
+        border-color: #ffc107;
+    }
+
     #header {
         position: sticky;
         top: 0;
@@ -201,22 +219,18 @@
         color: #212529;
     }
 
-    /*相同命名属性叠加*/
-    .sidebar-para {
-        border-right : solid 1px #e4e4e4;
-    }
 
     .sidebar-para {
           float: left;
           padding-left: 2%;
           width: 18%;
-          background: #fdfeff;
+
       }
 
     .content-para {
         float: left;
-        margin-left: 8%;
-        width: 72%;
+        width: 66%;
+        background: #f5f5d5;
     }
 
     /*蒙层*/
