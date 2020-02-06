@@ -68,19 +68,18 @@ public class NoteService {
         return new ResponseBean(200, "get list success", responseData);
     }
 
-
     public ResponseBean deleteNoteById(Integer id,String user) {
         logger.debug("step into");
         Integer userId = getCurrentUserId();
         Note note = noteRepository.findNoteByIdAndUserId(id,userId);
         if (note == null) {
-            throw new BadParamException();
+            throw new BadParamException("note note exist");
         }
         // delete 返回删除的记录数
         Integer deleteNum = noteRepository.deleteNoteByIdAndUserId(id,userId);
         if (deleteNum != 1) {
             logger.warn("delete note num[{}] isn't 1", deleteNum);
-            throw new DeleteException();
+            throw new DeleteException("delete note[" + note.getTitle() + "] fail");
         }
         return new ResponseBean(200,"delete note success", deleteNum);
     }
@@ -90,21 +89,24 @@ public class NoteService {
         Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
-            throw new BadParamException();
+            throw new BadParamException("title not exist,update fail");
         }
         String[] categories = addWrap.getCategories();
         if (categories == null || categories.length == 0) {
-            throw new BadParamException();
+            throw new BadParamException("category is empty,update fail");
         }
         Note note = noteRepository.findNoteByIdAndUserId(id, userId);
         if (note == null) {
-            throw new BadParamException();
+            throw new BadParamException("note not exist,update fail");
         }
         ArrayList<CategoryWrap> categoryWraps = new ArrayList<>(3);
         Integer parentId = 0;
+        // 当某级目录不存在时，之后所有子目录均要新建,新建标志newSubCategory
+        boolean newSubCategory = false;
         for (String category : categories) {
-            Category categorySearch = categoryRepository.findCategoryByCategoryAndUserId(category,userId);
-            if (categorySearch == null) {
+            Category categorySearch = categoryRepository.findCategoryByCategoryAndParentIdAndUserId(category,parentId,userId);
+            if (categorySearch == null || newSubCategory) {
+                newSubCategory = true;
                 categorySearch = new Category();
                 categorySearch.setCategory(category);
                 categorySearch.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -130,22 +132,21 @@ public class NoteService {
         Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
-            throw new BadParamException();
+            throw new BadParamException("title is empty,add fail");
         }
         String[] categories = addWrap.getCategories();
         if (categories == null || categories.length == 0) {
-            throw new BadParamException();
-        }
-        Note note = noteRepository.findNoteByTitleAndUserId(title, userId);
-        if (note != null) {
-            throw new NoteAlreadyExistException();
+            throw new BadParamException("category is empty,add fail");
         }
         ArrayList<CategoryWrap> categoryWraps = new ArrayList<>(3);
         // 首先顺序遍历查询category,不存在则添加category
         Integer parentId = 0;
+        // 当某级目录不存在时，之后所有子目录均要新建,新建标志newSubCategory
+        boolean newSubCategory = false;
         for (String category : categories) {
-            Category categorySearch = categoryRepository.findCategoryByCategoryAndUserId(category,userId);
-            if (categorySearch == null) {
+            Category categorySearch = categoryRepository.findCategoryByCategoryAndParentIdAndUserId(category,parentId,userId);
+            if (categorySearch == null || newSubCategory) {
+                newSubCategory = true;
                 categorySearch = new Category();
                 categorySearch.setCategory(category);
                 categorySearch.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -156,6 +157,15 @@ public class NoteService {
             }
             categoryWraps.add(0,new CategoryWrap(categorySearch.getId(),categorySearch.getCategory()));
             parentId = categorySearch.getId();
+        }
+
+        Note note = null;
+        //当未新建子文件夹时，最后的子目录下无同名note才能新建
+        if (!newSubCategory) {
+            note = noteRepository.findNotesByTitleAndCategoryIdAndUserId(title,parentId,userId);
+            if (note != null) {
+                throw new NoteAlreadyExistException("note already exist in the same path!!!");
+            }
         }
         note = new Note();
         note.setUserId(userId);
@@ -173,7 +183,7 @@ public class NoteService {
         List<Object[]> note = noteRepository.findNote(id, getCurrentUserId());
         if (note == null) {
             logger.warn("note (with id {}) not exist", id);
-            throw new NoteNotExistException();
+            throw new NoteNotExistException("note[" + id +"] not exist");
         }
         return new ResponseBean(200, "get note success by id",
                 new NoteWrap((Integer) note.get(0)[0], (String) note.get(0)[1], (String) note.get(0)[2]));
@@ -182,6 +192,7 @@ public class NoteService {
     private ResponseBean searchNotes(String searchInfo) {
         logger.debug("step into");
         logger.debug("searchInfo[{}]",searchInfo);
+        // TODO 分页查询，标题内容分开查询
         List<Note> notes = noteRepository.findNotesBySearchInfo(getCurrentUserId(),searchInfo);
         if (notes == null || notes.isEmpty()) {
             return new ResponseBean(404, "matching nothing with " + searchInfo, null);

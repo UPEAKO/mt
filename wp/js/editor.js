@@ -9,8 +9,11 @@
  * {@link       https://github.com/pandao/editor.md}
  * @updateTime  2015-06-09
  */
-
-;(function(factory) {
+// 开头分号顾及多个js文件合并压缩
+;
+// 最外层括号将所有内部内容当成一条语句
+// 整体为一个匿名函数调用，将factory函数绑定到window对象
+(function(factory) {
     "use strict";
 
     // CommonJS/Node.js
@@ -963,7 +966,7 @@
          * @returns {editormd}                  this(editormd instance object.)
          */
 
-        on : function(eventType, callback) {
+        xon : function(eventType, callback) {
             var settings = this.settings;
 
             if (typeof settings["on" + eventType] !== "undefined")

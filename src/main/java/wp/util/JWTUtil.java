@@ -7,15 +7,26 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+@Component
 public class JWTUtil {
 
     private final static Logger logger = LoggerFactory.getLogger(JWTUtil.class);
 
     // 过期时间6小时
-    private static final long EXPIRE_TIME = 6*60*60*1000;
+    private static long EXPIRE_TIME = 6*60*60*1000;
+
+    @Value("${wp.util.expireTime}")
+    public void setExpireTime(long expireTime) {
+        logger.debug("default expire time[{}]", EXPIRE_TIME);
+        EXPIRE_TIME = expireTime;
+        logger.warn("expire time from configure file[{}] was set", EXPIRE_TIME );
+    }
 
     public static boolean verify(String token, String secret) {
         logger.debug("step into");

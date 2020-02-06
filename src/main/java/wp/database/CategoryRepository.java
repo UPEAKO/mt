@@ -13,5 +13,5 @@ public interface CategoryRepository extends CrudRepository<Category, Integer> {
     @Query(nativeQuery = true,value = findCategories)
     List<Object[]> findCategories(Integer userId);
 
-    Category findCategoryByCategoryAndUserId(String category, Integer userId);
+    Category findCategoryByCategoryAndParentIdAndUserId(String category, Integer parentId, Integer userId);
 }

@@ -26,40 +26,40 @@ public class ExceptionController {
     public ResponseBean handle401(ShiroException e) {
         logger.debug("step into");
         logger.warn(e.getMessage());
-        return new ResponseBean(401, e.getMessage(), null);
+        return new ResponseBean(401, e.getMessage() != null ? e.getMessage() : "shiro exception", null);
     }
 
     // 捕捉UnauthorizedException
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseBean handle401() {
+    public ResponseBean handle401(UnauthorizedException e) {
         logger.debug("step into");
         logger.warn("Unauthorized");
-        return new ResponseBean(401, "Unauthorized", null);
+        return new ResponseBean(401, e.getMessage() != null ? e.getMessage() : "Unauthorized", null);
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoteNotExistException.class)
-    public ResponseBean handle404() {
+    public ResponseBean handle404(NoteNotExistException e) {
         logger.debug("step into");
         logger.warn("note not exist");
-        return new ResponseBean(404, "note not exist", null);
+        return new ResponseBean(404, e.getMessage() != null ? e.getMessage() : "note not exist", null);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(NoteAlreadyExistException.class)
-    public ResponseBean handle409() {
+    public ResponseBean handle409(NoteAlreadyExistException e) {
         logger.debug("step into");
         logger.warn("note already exist");
-        return new ResponseBean(409, "note already exist", null);
+        return new ResponseBean(409, e.getMessage() != null ? e.getMessage() : "note already exist", null);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BadParamException.class})
-    public ResponseBean handle400() {
+    public ResponseBean handle400(BadParamException e) {
         logger.debug("step into");
         logger.warn("wrong param");
-        return new ResponseBean(400, "wrong param", null);
+        return new ResponseBean(400, e.getMessage() != null ? e.getMessage() : "wrong param", null);
     }
 
     // 捕捉其他所有异常

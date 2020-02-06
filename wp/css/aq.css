@@ -1,6 +1,4 @@
-/*@import url("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css");*/
-
-@import url("https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css");
+@import url("https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css");
 
 /*盒模型*/
 * {

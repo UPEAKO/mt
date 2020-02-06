@@ -6,7 +6,7 @@
 
 const isDebug = false;
 //const baseUrl = "http://localhost:8080/";
-const baseUrl = "https://wypmk.xyz:8888/wp/";
+const baseUrl = "https://oscloud.xyz/wp/";
 const $body = $("body");
 const $multiList = $("#multiList");
 const $dialog = $("#dialog");
@@ -28,6 +28,12 @@ let notes;
 
 // pre
 pre();
+// bind enter for login first
+$body.on("keydown",function (event) {
+    if (event.keyCode === 13) {
+        $('.ui-button.ui-corner-all.ui-widget').click();
+    }
+});
 // login in
 login();
 // 获取设置note
@@ -71,8 +77,8 @@ $body.on("click", ".x-wiki-index-item" ,function () {
                 }
             }
         },
-        error: function (jqXHR, textStatus) {
-            alert("get note wrong with textStatus: " + textStatus);
+        error: function (jqXHR,textStatus) {
+            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
         }
     });
 });
@@ -588,7 +594,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
     if (isDebug) console.log(noteContent);
     const noteTitle = $("#title").val();
     if (noteTitle.length === 0) {
-        alert("title should not empty!!!")
+        alert("title should not empty!!!");
         return;
     }
     let addWrap = {
@@ -640,8 +646,8 @@ function postOrPutNote(cm, icon, cursor, selection) {
                 alert("note already post!!!");
             }
         },
-        error: function (jqXHR, textStatus) {
-            alert("post note fail with textStatus: " + textStatus);
+        error: function (jqXHR,textStatus) {
+            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -671,8 +677,8 @@ function deleteNote() {
                 alert("already delete note " + noteId);
             }
         },
-        error: function (jqXHR, textStatus) {
-            alert("delete note fail with textStatus: " + textStatus);
+        error: function (jqXHR,textStatus) {
+            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -760,8 +766,8 @@ function search() {
                 $searchContainer.append($("<hr>"));
             }
         },
-        error: function (jqXHR, textStatus) {
-            alert(`error code[${jqXHR.status}], textStatus[${textStatus}]`);
+        error: function (jqXHR,textStatus) {
+            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -797,6 +803,7 @@ function login() {
                         let password = $("#passWord").val();
                         sessionStorage.setItem('username',userName);
                         sessionStorage.setItem('password',password);
+                        $("#passWord").val("");
                         //登录成功时调用关闭dialog
                         getToken(userName,password);
                     }
@@ -831,11 +838,14 @@ function getToken(userName,password) {
                     //登录成功时调用关闭dialog
                     $dialog.dialog("close");
                     sessionStorage.setItem('hasLogin','hasLogin');
+                    $body.off('keydown');
                 }
             }
         },
-        error: function (jqXHR, textStatus) {
-            alert("get token wrong with textStatus: " + textStatus);
+        error: function (jqXHR,textStatus) {
+            //TODO 未知原因，似乎dialog input 获得焦点后回车，juqeryui内部逻辑自动关闭dailog
+            $dialog.dialog("open");
+            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
         }
     });
 }

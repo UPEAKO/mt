@@ -27,13 +27,13 @@ public class UserService {
         User user = userRepository.findUserByName(userName);
         if (user == null) {
             logger.warn("current user[{}] does not exist", userName);
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("user[" + userName + "]not exist");
         }
         if (passWord.equals(user.getPassword())) {
             return new ResponseBean(200, "login success", JWTUtil.sign(userName,user.getId(), passWord));
         } else {
             logger.info("user[{}] with password[{}] try to get token fail",userName,passWord);
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("wrong password");
         }
     }
 }

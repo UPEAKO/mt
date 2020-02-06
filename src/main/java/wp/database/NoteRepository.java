@@ -23,7 +23,7 @@ public interface NoteRepository extends CrudRepository<Note, Integer> {
     @Query(nativeQuery = true, value = findNotesBySearchInfo)
     List<Note> findNotesBySearchInfo(Integer userId,String info);
 
-    Note findNoteByTitleAndUserId(String title, Integer userId);
+    Note findNotesByTitleAndCategoryIdAndUserId(String title, Integer categoryId, Integer userId);
 
     Note findNoteByIdAndUserId(Integer id, Integer userId);
 
