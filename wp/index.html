@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.staticfile.org/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <!-- 需要覆盖jquery-ui的部分css -->
+    <link rel="stylesheet" href="css/aq.css">
+    <link rel="stylesheet" href="css/editormd.min.css"/>
+    <link href="https://cdn.staticfile.org/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+    <title>WP - Lost Time Never Found Again</title>
+</head>
+<body class="my-back-color">
+<header id="header">
+    <!-- 用于editor上传图片选择图片 -->
+    <input id="imageChoose" type="file" accept=".jpg,.jpeg,.gif,.png,.bmp,.webp" style="display: none">
+    <div id="dialog" style="display: none">
+        <form style="position: relative">
+            <input type="text" id="userName" placeholder="UserName" value="wp" style="text-align: center"/>
+            <input type="password" id="passWord" placeholder="PassWord" autofocus style="position: relative; margin-top: 6px;text-align: center"/>
+        </form>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light my-back-color">
+        <a id="index" isHidden="true" class="navbar-brand" href="#">WP</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a id="create" class="nav-link" href="#">Create</a>
+                </li>
+                <li class="nav-item">
+                    <a id="edit" class="nav-link" href="#">Edit</a>
+                </li>
+                <li class="nav-item">
+                    <a id="logout" class="nav-link" href="#">Logout</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a id="backup" class="dropdown-item" href="#">BackUp</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+            </ul>
+            <div style="position: relative">
+                <form class="form-inline my-2 my-lg-0">
+                    <input id="search-info" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    <button id="search-button" class="btn btn-outline-success my-2 my-sm-0 my-search-button" type="button">Search</button>
+                </form>
+                <div id="search-container" class="search-container"></div>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container-fluid">
+    <div id="row1" class="row" style="position: relative; overflow-y: scroll; overflow-x: hidden;">
+        <div id="sidebar" class="sidebar-para">
+            <div id="toggle">
+                <i onclick="expandWikiNode($('#multiList>i').get(0), true)" class="fas fa-angle-double-down my-toggle"></i>
+                <i onclick="collapseWikiNode($('#multiList>i').get(0), true)" class="fas fa-angle-double-up my-toggle"></i>
+            </div>
+            <div id="multiList" expand="true" depth="0" class="side-bar-mar"></div>
+        </div>
+        <div id="content" class="content-para">
+            <div id="main">
+                <h3 id="currentTitle" noteId="-1" style="text-align: center"></h3>
+                <textarea id="store-current-content" style="display: none"></textarea>
+                <div id="content-editormd" style="padding: 0; width: 100%;" class="my-back-color"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="overlay" style="display: none"></div>
+<div id="content-editormd-editor" style="display: none"></div>
+
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.staticfile.org/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+<script src="js/editormd.min.js"></script>
+<script src="lib/marked.min.js"></script>
+<script src="lib/prettify.min.js"></script>
+<script src="lib/raphael.min.js"></script>
+<script src="lib/underscore.min.js"></script>
+<script src="lib/sequence-diagram.min.js"></script>
+<script src="lib/flowchart.min.js"></script>
+<script src="lib/jquery.flowchart.min.js"></script>
+
+<script src="js/aq.js"></script>
+</body>
+<footer>
+    <hr>
+    <p style="text-align: center">Life is a journey, not a destination</p>
+</footer>
+</html>

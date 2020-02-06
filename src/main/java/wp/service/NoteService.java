@@ -1,5 +1,7 @@
 package wp.service;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import wp.exception.DeleteException;
 import wp.exception.NoteAlreadyExistException;
 import wp.exception.NoteNotExistException;
 import wp.shiro.MyRealm;
+import wp.util.JWTUtil;
 import wp.wrap.AddWrap;
 import wp.wrap.CategoryWrap;
 import wp.wrap.NoteCategoryWrap;
@@ -22,48 +25,37 @@ import wp.wrap.NoteWrap;
 import java.sql.Timestamp;
 import java.util.*;
 
-/**
- * delete or update 可能抛弃部分category
- * 不影响分类，只是无用数据冗余，但减少查询及响应时间
- * 被抛弃的category在下次新建同名分类时直接被启用
- */
+
 @Service
 public class NoteService {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(NoteService.class);
 
     private NoteRepository noteRepository;
 
     private CategoryRepository categoryRepository;
 
-    private MyRealm myRealm;
-
     @Autowired
-    public NoteService(NoteRepository noteRepository, CategoryRepository categoryRepository, MyRealm myRealm) {
+    public NoteService(NoteRepository noteRepository, CategoryRepository categoryRepository) {
         this.noteRepository = noteRepository;
         this.categoryRepository = categoryRepository;
-        this.myRealm = myRealm;
     }
 
-    /**
-     * 1.获取当前user下的所有note_id,note_title,category_id from notes_tb  (List<Object[]>形式)
-     * 2.获取当前user下的所有category_id,category_parent_id,category_name from categories_tb  (List<Object[]>形式)
-     * 3.查找组建categoriesChain
-     * @return bean
-     */
-    public ResponseBean getNoteList() {
-        logger.info("myRealm'hashcode: {}", myRealm.hashCode());
-        Integer userId = myRealm.getUser().getId();
-        // note_id, note_title, category_id
+    public ResponseBean getNoteList(String user,String searchInfo) {
+        logger.debug("step into");
+
+        if (!searchInfo.isEmpty()) {
+            return searchNotes(searchInfo);
+        }
+
+        Integer userId = getCurrentUserId();
         List<Object[]> notes = noteRepository.findNotes(userId);
-        // category_id, category_parent_id, category_name
         List<Object[]> categories = categoryRepository.findCategories(userId);
         List<NoteCategoryWrap> responseData = new ArrayList<>();
         for (Object[] objects : notes) {
             Integer noteId = (Integer) objects[0];
             String noteTitle = (String) objects[1];
             Integer categoryId = (Integer) objects[2];
-            //通过categoryId向上溯源到id==0
             ArrayList<CategoryWrap> categoriesChain = new ArrayList<>();
             while (categoryId != 0) {
                 int categoriesLocation = findParentCategory(categoryId,categories);
@@ -76,63 +68,57 @@ public class NoteService {
         return new ResponseBean(200, "get list success", responseData);
     }
 
-    /**
-     * 通过sql日志可知jpa删除会先执行查询，delete函数返回删除的记录数（Integer)
-     * @param id noteId
-     * @return bean
-     */
-    public ResponseBean deleteNoteById(Integer id) {
-        Integer userId = myRealm.getUser().getId();
+    public ResponseBean deleteNoteById(Integer id,String user) {
+        logger.debug("step into");
+        Integer userId = getCurrentUserId();
         Note note = noteRepository.findNoteByIdAndUserId(id,userId);
         if (note == null) {
-            throw new BadParamException();
+            throw new BadParamException("note note exist");
         }
+        // delete 返回删除的记录数
         Integer deleteNum = noteRepository.deleteNoteByIdAndUserId(id,userId);
         if (deleteNum != 1) {
-            throw new DeleteException();
+            logger.warn("delete note num[{}] isn't 1", deleteNum);
+            throw new DeleteException("delete note[" + note.getTitle() + "] fail");
         }
         return new ResponseBean(200,"delete note success", deleteNum);
     }
 
-    /**
-     *
-     * @param id noteId
-     * @param addWrap 上传json数据
-     * @return getList相同数据类型NoteCategoryWrap
-     */
-    public ResponseBean updateNoteById(Integer id, AddWrap addWrap) {
-        Integer userId = myRealm.getUser().getId();
+    public ResponseBean updateNoteById(Integer id, AddWrap addWrap,String user) {
+        logger.debug("step into");
+        Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
-            throw new BadParamException();
+            throw new BadParamException("title not exist,update fail");
         }
         String[] categories = addWrap.getCategories();
         if (categories == null || categories.length == 0) {
-            throw new BadParamException();
+            throw new BadParamException("category is empty,update fail");
         }
         Note note = noteRepository.findNoteByIdAndUserId(id, userId);
         if (note == null) {
-            throw new BadParamException();
+            throw new BadParamException("note not exist,update fail");
         }
-        // 修改目录树
         ArrayList<CategoryWrap> categoryWraps = new ArrayList<>(3);
-        // 首先顺序遍历查询category,不存在则添加category
         Integer parentId = 0;
+        // 当某级目录不存在时，之后所有子目录均要新建,新建标志newSubCategory
+        boolean newSubCategory = false;
         for (String category : categories) {
-            Category categorySearch = categoryRepository.findCategoryByCategoryAndUserId(category,userId);
-            if (categorySearch == null) {
+            Category categorySearch = categoryRepository.findCategoryByCategoryAndParentIdAndUserId(category,parentId,userId);
+            if (categorySearch == null || newSubCategory) {
+                newSubCategory = true;
                 categorySearch = new Category();
                 categorySearch.setCategory(category);
                 categorySearch.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 categorySearch.setParentId(parentId);
                 categorySearch.setUserId(userId);
                 categorySearch = categoryRepository.save(categorySearch);
+                logger.warn("save {} into categories_tb", category);
             }
-            // 由于fastJson序列化时只能保证数组的顺序，故未用LinkedList添加到队首（同getList统一顺序格式）
+            // json序列化时只能保证数组的顺序
             categoryWraps.add(0,new CategoryWrap(categorySearch.getId(),categorySearch.getCategory()));
             parentId = categorySearch.getId();
         }
-        // 将最后的parentId值作为note_tb中的category_id
         note.setTitle(title);
         note.setContent(addWrap.getContent());
         note.setCategoryId(parentId);
@@ -141,41 +127,46 @@ public class NoteService {
                 new NoteCategoryWrap(note.getId(),title,categoryWraps));
     }
 
-    public ResponseBean addNote(AddWrap addWrap) {
-        Integer userId = myRealm.getUser().getId();
+    public ResponseBean addNote(AddWrap addWrap,String user) {
+        logger.debug("step into");
+        Integer userId = getCurrentUserId();
         String title = addWrap.getTitle();
         if (title == null || title.isEmpty()) {
-            throw new BadParamException();
+            throw new BadParamException("title is empty,add fail");
         }
         String[] categories = addWrap.getCategories();
         if (categories == null || categories.length == 0) {
-            throw new BadParamException();
-        }
-        Note note = noteRepository.findNoteByTitleAndUserId(title, userId);
-        if (note != null) {
-            throw new NoteAlreadyExistException();
+            throw new BadParamException("category is empty,add fail");
         }
         ArrayList<CategoryWrap> categoryWraps = new ArrayList<>(3);
         // 首先顺序遍历查询category,不存在则添加category
         Integer parentId = 0;
+        // 当某级目录不存在时，之后所有子目录均要新建,新建标志newSubCategory
+        boolean newSubCategory = false;
         for (String category : categories) {
-            Category categorySearch = categoryRepository.findCategoryByCategoryAndUserId(category,userId);
-            if (categorySearch == null) {
+            Category categorySearch = categoryRepository.findCategoryByCategoryAndParentIdAndUserId(category,parentId,userId);
+            if (categorySearch == null || newSubCategory) {
+                newSubCategory = true;
                 categorySearch = new Category();
                 categorySearch.setCategory(category);
                 categorySearch.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 categorySearch.setParentId(parentId);
                 categorySearch.setUserId(userId);
-                logger.info("查询间隔");
                 categorySearch = categoryRepository.save(categorySearch);
-                // 注意此处category id 事先未设定,存储返回结果仍为null,与note.java中联合主键注解矛盾
-                //categorySearch = categoryRepository.findCategoryByCategoryAndUserId(category,userId);
+                logger.info("save {} into categories_tb", category);
             }
-            // 由于fastJson序列化时只能保证数组的顺序，故未用LinkedList添加到队首（同getList统一顺序格式）
             categoryWraps.add(0,new CategoryWrap(categorySearch.getId(),categorySearch.getCategory()));
             parentId = categorySearch.getId();
         }
-        // 将最后的parentId值作为note_tb中的category_id
+
+        Note note = null;
+        //当未新建子文件夹时，最后的子目录下无同名note才能新建
+        if (!newSubCategory) {
+            note = noteRepository.findNotesByTitleAndCategoryIdAndUserId(title,parentId,userId);
+            if (note != null) {
+                throw new NoteAlreadyExistException("note already exist in the same path!!!");
+            }
+        }
         note = new Note();
         note.setUserId(userId);
         note.setTitle(addWrap.getTitle());
@@ -183,20 +174,30 @@ public class NoteService {
         note.setCategoryId(parentId);
         note.setCreateTime(new Timestamp(System.currentTimeMillis()));
         note = noteRepository.save(note);
-        // 注意此处note id 事先未设定,存储返回结果仍为null,与note.java中联合主键注解矛盾
-        //note = noteRepository.findNoteByTitleAndUserId(addWrap.getTitle(), userId);
         return new ResponseBean(200, "add success",
                 new NoteCategoryWrap(note.getId(),note.getTitle(),categoryWraps));
     }
 
-    public ResponseBean getNoteById(Integer id) {
-        List<Object[]> note = noteRepository.findNote(id, myRealm.getUser().getId());
+    public ResponseBean getNoteById(Integer id,String user) {
+        logger.debug("step into");
+        List<Object[]> note = noteRepository.findNote(id, getCurrentUserId());
         if (note == null) {
-            logger.info("该note不存在，note_id: {}", id);
-            throw new NoteNotExistException();
+            logger.warn("note (with id {}) not exist", id);
+            throw new NoteNotExistException("note[" + id +"] not exist");
         }
         return new ResponseBean(200, "get note success by id",
                 new NoteWrap((Integer) note.get(0)[0], (String) note.get(0)[1], (String) note.get(0)[2]));
+    }
+
+    private ResponseBean searchNotes(String searchInfo) {
+        logger.debug("step into");
+        logger.debug("searchInfo[{}]",searchInfo);
+        // TODO 分页查询，标题内容分开查询
+        List<Note> notes = noteRepository.findNotesBySearchInfo(getCurrentUserId(),searchInfo);
+        if (notes == null || notes.isEmpty()) {
+            return new ResponseBean(404, "matching nothing with " + searchInfo, null);
+        }
+        return new ResponseBean(200,"get search result succeed", notes);
     }
 
     private int findParentCategory(Integer categoryId, List<Object[]> categories) {
@@ -206,5 +207,11 @@ public class NoteService {
             }
         }
         return -1;
+    }
+
+    private int getCurrentUserId() {
+        Subject subject = SecurityUtils.getSubject();
+        String token = subject.getPrincipal().toString();
+        return JWTUtil.getUserId(token);
     }
 }

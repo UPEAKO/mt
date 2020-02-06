@@ -18,38 +18,44 @@ import wp.database.UserRepository;
 import wp.util.JWTUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.function.Consumer;
 
 @Service
 public class MyRealm extends AuthorizingRealm {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(MyRealm.class);
 
-    private UserRepository userRepository;
-
-    private User user;
-
-    public User getUser() {
-        return user;
-    }
+    private HashMap<String,User> cacheUsers = new HashMap<>(1);
 
     @Autowired
     public MyRealm(UserRepository userRepository) {
-        this.userRepository = userRepository;
+        logger.debug("step into");
+        Iterable<User> users = userRepository.findAll();
+        users.forEach(user -> {
+            cacheUsers.put(user.getName(),user);
+            logger.warn("put user[{}]  from db to cacheUsers",user.getName());
+        });
     }
 
     @Override
     public boolean supports(AuthenticationToken token) {
+        logger.debug("step into");
         return token instanceof JWTToken;
     }
 
     /**
-     * 只有当需要检测用户权限的时候才会调用此方法，例如checkRole,checkPermission之类的
+     * 只有当需要检测用户权限的时候才会调用此方法，例如checkRole,checkPermission
      */
+    // FIXME doGetAuthorizationInfo每次请求都重复执行4次
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        logger.info("授权");
+        logger.debug("step into");
+        // FIXME the principal is token,not userName
         String username = JWTUtil.getUsername(principals.toString());
-        if (!user.getName().equals(username)) {
+        User user = cacheUsers.get(username);
+        if (user == null || !user.getName().equals(username)) {
             throw new UnauthorizedException();
         }
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
@@ -65,18 +71,19 @@ public class MyRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-        logger.info("验证");
+        logger.debug("step into");
         String token = (String) auth.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (username == null) {
             throw new AuthenticationException("token invalid");
         }
-        user = userRepository.findUserByName(username);
-        logger.info("myRealm'hashcode: {}", this.hashCode());
+        User user = cacheUsers.get(username);
+        logger.info("myRealm'hashcode[{}]", this.hashCode());
         if (user == null) {
             throw new AuthenticationException("User didn't existed!");
         }
-        if (! JWTUtil.verify(token, user.getName(), user.getPassword())) {
+        logger.debug("current user[userId({}),userName({})]'s hashcode[{}]", user.getId(),user.getName(),user.hashCode());
+        if (! JWTUtil.verify(token,user.getPassword())) {
             throw new AuthenticationException("Username or password error");
         }
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5level %logger{36}[%M] - %msg%n"/>
+        </Console>
+        <!-- append:每次启动删除之前的日志 -->
+        <File name="File" fileName="log/wp.log" append="false">
+            <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5level %logger{36}[%M] - %msg%n"/>
+        </File>
+        <File name="DDNS" fileName="log/ddns.log" append="false">
+            <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5level %logger{36}[%M] - %msg%n"/>
+        </File>
+        <File name="ROOT" fileName="log/root.log" append="false">
+            <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5level %logger{36}[%M] - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <!-- name:包名或全限定类名-->
+        <Logger name="wp" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <!-- additivity:设置子logger不将日志再次输出到父logger -->
+        <Logger name="wp.ddns" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="ROOT"/>
+        </Root>
+    </Loggers>
+</Configuration>

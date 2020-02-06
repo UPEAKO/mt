@@ -1,5 +1,8 @@
 package wp.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -20,9 +23,20 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class ImageStorageService {
 
-    private final Path rootLocation = Paths.get("E:\\work\\images");
+    private final static Logger logger = LoggerFactory.getLogger(ImageStorageService.class);
+
+    @Value("${wp.service.ImageStorageService.path}")
+    private String root;
+
+    @Value("${wp.service.ImageStorageService.baseUrl}")
+    private String baseUrl;
+
+    @Value("${wp.service.ImageStorageService.backUpPath}")
+    private String backUpPath;
 
     public ResponseBean store(MultipartFile file) {
+        logger.debug("step into");
+        logger.debug("root path inject into ImageStorageService is [{}]", root);
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         try {
             if (file.isEmpty()) {
@@ -30,14 +44,11 @@ public class ImageStorageService {
             }
             if (filename.contains("..")) {
                 // This is a security check
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory " + filename);
+                throw new StorageException("Cannot store file with relative path outside current directory " + filename);
             }
             try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, this.rootLocation.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING);
-                return new ResponseBean(200,"image upload succeed",
-                        "http://localhost:8080/wp/image/" + filename);
+                Files.copy(inputStream, Paths.get(root).resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+                return new ResponseBean(200,"image upload succeed", baseUrl + filename);
             }
         }
         catch (IOException e) {
@@ -45,23 +56,18 @@ public class ImageStorageService {
         }
     }
 
-    private Path load(String filename) {
-        return rootLocation.resolve(filename);
-    }
-
-    public Resource loadAsResource(String filename) {
+    public Resource loadBackupFile() {
         try {
-            Path file = load(filename);
+            Path file = Paths.get(backUpPath);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             }
             else {
-                throw new StorageFileNotFoundException("Could not read file: " + filename);
+                throw new StorageFileNotFoundException("back up file not found");
             }
-        }
-        catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+        } catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("back up file not found");
         }
     }
 }

@@ -2,7 +2,9 @@
 target/
 .idea/
 wp.sql
-application.properties
+config/application.properties
 mt.iml
 wp.iml
+wp/.idea/
 log/
+wp/css/bootstrap.css
