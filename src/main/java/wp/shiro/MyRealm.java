@@ -19,8 +19,6 @@ import wp.util.JWTUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.function.Consumer;
 
 @Service
 public class MyRealm extends AuthorizingRealm {

@@ -46,8 +46,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             try {
                 executeLogin(request, response);
             } catch (Exception e) {
-                e.printStackTrace();
-                response401(request, response);
+                // FIXME 暂时直接丢弃异常，使之进入controller进而调用相应的注解处理器，最后执行shiro注解处理器会由于MyRealm的doGetAuthenticationInfo未
+                // FIXME 返回princle而对缺少principal抛出UnauthenticatedException错误,被hand401捕获
+                //return false;
             }
         }
         return true;
@@ -70,18 +71,5 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             return false;
         }
         return super.preHandle(request, response);
-    }
-
-    /**
-     * 将非法请求跳转到 /401
-     */
-    private void response401(ServletRequest req, ServletResponse resp) {
-        logger.debug("step into");
-        try {
-            HttpServletResponse httpServletResponse = (HttpServletResponse) resp;
-            httpServletResponse.sendRedirect("/401");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
     }
 }

@@ -22,10 +22,6 @@ import wp.util.JWTUtil;
 import wp.wrap.AddWrap;
 import wp.wrap.UserWrap;
 
-
-// FIXME title & category即使在不同目录也都必须命名唯一，由于通过名称查询（目前名称重复直接导致提交失败）
-// TODO token过期时间自定义，备份sql及images的路径自定义
-
 @RestController
 public class NoteController {
 
@@ -122,12 +118,5 @@ public class NoteController {
         }
         Resource file = imageStorageService.loadBackupFile();
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"wp-image-sql.tar.gz\"").body(file);
-    }
-
-    @RequestMapping(path = "/401")
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseBean unauthorized() {
-        logger.debug("step into");
-        return new ResponseBean(401, "Unauthorized401", null);
     }
 }
