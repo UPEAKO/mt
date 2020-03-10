@@ -78,7 +78,7 @@ $body.on("click", ".x-wiki-index-item" ,function () {
             }
         },
         error: function (jqXHR,textStatus) {
-            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
+            alert(`${textStatus}: ${jqXHR.responseJSON === undefined ? "undefined msg" : jqXHR.responseJSON.msg}`);
         }
     });
 });
@@ -647,7 +647,7 @@ function postOrPutNote(cm, icon, cursor, selection) {
             }
         },
         error: function (jqXHR,textStatus) {
-            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
+            alert(`${textStatus}: ${jqXHR.responseJSON === undefined ? "undefined msg" : jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -678,7 +678,7 @@ function deleteNote() {
             }
         },
         error: function (jqXHR,textStatus) {
-            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
+            alert(`${textStatus}: ${jqXHR.responseJSON === undefined ? "undefined msg" : jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -767,7 +767,7 @@ function search() {
             }
         },
         error: function (jqXHR,textStatus) {
-            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
+            alert(`${textStatus}: ${jqXHR.responseJSON === undefined ? "undefined msg" : jqXHR.responseJSON.msg}`);
         }
     });
 }
@@ -845,7 +845,7 @@ function getToken(userName,password) {
         error: function (jqXHR,textStatus) {
             //TODO 未知原因，似乎dialog input 获得焦点后回车，juqeryui内部逻辑自动关闭dailog
             $dialog.dialog("open");
-            alert(`${textStatus}: ${jqXHR.responseJSON.msg}`);
+            alert(`${textStatus}: ${jqXHR.responseJSON === undefined ? "undefined msg" : jqXHR.responseJSON.msg}`);
         }
     });
 }
